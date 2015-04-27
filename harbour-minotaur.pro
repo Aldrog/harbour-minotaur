@@ -18,13 +18,12 @@ SOURCES += src/harbour-minotaur.cpp
 
 OTHER_FILES += qml/harbour-minotaur.qml \
     qml/cover/CoverPage.qml \
-    qml/pages/FirstPage.qml \
-    qml/pages/SecondPage.qml \
     rpm/harbour-minotaur.changes.in \
     rpm/harbour-minotaur.spec \
     rpm/harbour-minotaur.yaml \
     translations/*.ts \
-    harbour-minotaur.desktop
+    harbour-minotaur.desktop \
+    qml/pages/MenuPage.qml
 
 # to disable building translations every time, comment out the
 # following CONFIG line
@@ -34,5 +33,5 @@ CONFIG += sailfishapp_i18n
 # planning to localize your app, remember to comment out the
 # following TRANSLATIONS line. And also do not forget to
 # modify the localized app name in the the .desktop file.
-TRANSLATIONS += translations/harbour-minotaur-de.ts
+#TRANSLATIONS += translations/harbour-minotaur-de.ts
 
