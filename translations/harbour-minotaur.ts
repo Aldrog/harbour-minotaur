@@ -8,4 +8,15 @@
         <translation type="unfinished"></translation>
     </message>
 </context>
+<context>
+    <name>MenuPage</name>
+    <message>
+        <source>Play</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Quit</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
 </TS>

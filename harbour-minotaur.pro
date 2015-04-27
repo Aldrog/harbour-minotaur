@@ -14,7 +14,8 @@ TARGET = harbour-minotaur
 
 CONFIG += sailfishapp
 
-SOURCES += src/harbour-minotaur.cpp
+SOURCES += src/harbour-minotaur.cpp \
+    src/tools.cpp
 
 OTHER_FILES += qml/harbour-minotaur.qml \
     qml/cover/CoverPage.qml \
@@ -34,4 +35,7 @@ CONFIG += sailfishapp_i18n
 # following TRANSLATIONS line. And also do not forget to
 # modify the localized app name in the the .desktop file.
 #TRANSLATIONS += translations/harbour-minotaur-de.ts
+
+HEADERS += \
+    src/tools.h
 

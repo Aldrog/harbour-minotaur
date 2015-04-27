@@ -15,9 +15,9 @@ Name:       harbour-minotaur
 Summary:    The game about labyrinths... and minotaurs
 Version:    0.1
 Release:    1
-Group:      Qt/Qt
-License:    LICENSE
-URL:        http://example.org/
+Group:      Amusements/Games
+License:    GPLv3
+URL:        https://github.com/Aldrog/harbour-minotaur
 Source0:    %{name}-%{version}.tar.bz2
 Source100:  harbour-minotaur.yaml
 Requires:   sailfishsilica-qt5 >= 0.10.9

@@ -35,6 +35,20 @@ import Sailfish.Silica 1.0
 Page {
 	id: page
 
+	Column {
+		anchors.centerIn: parent
+		spacing: 10
+
+		Button {
+			text: qsTr("Play")
+		}
+
+		Button {
+			text: qsTr("Quit")
+
+			onClicked: cpptools.quit()
+		}
+	}
 }
 
 
