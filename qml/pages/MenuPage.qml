@@ -41,11 +41,11 @@ Page {
 
 		Button {
 			text: qsTr("Play")
+			onClicked: pageStack.push(Qt.resolvedUrl("GamePage.qml"))
 		}
 
 		Button {
 			text: qsTr("Quit")
-
 			onClicked: cpptools.quit()
 		}
 	}

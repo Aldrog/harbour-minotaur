@@ -9,6 +9,13 @@
     </message>
 </context>
 <context>
+    <name>GamePage</name>
+    <message>
+        <source>Minotaur. Level 1</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>MenuPage</name>
     <message>
         <source>Play</source>

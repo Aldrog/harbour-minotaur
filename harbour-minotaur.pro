@@ -24,7 +24,8 @@ OTHER_FILES += qml/harbour-minotaur.qml \
     rpm/harbour-minotaur.yaml \
     translations/*.ts \
     harbour-minotaur.desktop \
-    qml/pages/MenuPage.qml
+    qml/pages/MenuPage.qml \
+    qml/pages/GamePage.qml
 
 # to disable building translations every time, comment out the
 # following CONFIG line
