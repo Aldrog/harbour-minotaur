@@ -19,21 +19,29 @@ void MazeEngine::setDimension(int dimension) {
 			for (int j = 0; j < dimension; j++) {
 				p.s = QPoint(i, j);
 
-				p.d = Up;
-				p.e = QPoint(i, j - 1);
-				_passes.append(p);
+				if(j > 0) {
+					p.d = Up;
+					p.e = QPoint(i, j - 1);
+					_passes.append(p);
+				}
 
-				p.d = Down;
-				p.e = QPoint(i, j + 1);
-				_passes.append(p);
+				if(j < dimension - 1) {
+					p.d = Down;
+					p.e = QPoint(i, j + 1);
+					_passes.append(p);
+				}
 
-				p.d = Left;
-				p.e = QPoint(i - 1, j);
-				_passes.append(p);
+				if(i > 0) {
+					p.d = Left;
+					p.e = QPoint(i - 1, j);
+					_passes.append(p);
+				}
 
-				p.d = Right;
-				p.e = QPoint(i + 1, j);
-				_passes.append(p);
+				if(i < dimension - 1) {
+					p.d = Right;
+					p.e = QPoint(i + 1, j);
+					_passes.append(p);
+				}
 			}
 	}
 }

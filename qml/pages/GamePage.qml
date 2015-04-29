@@ -30,7 +30,7 @@ Page {
 			height: width
 			color: "transparent"
 			border.width: 3
-			border.color: "white"
+			border.color: Theme.primaryColor
 
 			property int youx: 0
 			property int youy: 0
@@ -52,8 +52,7 @@ Page {
 								width: labyrinth.width / size
 								height: labyrinth.height / size
 								color: (lx == labyrinth.youx && ly == labyrinth.youy) ? "magenta" : "transparent"
-								border.width: 1
-								border.color: "white"
+
 							}
 						}
 					}
@@ -84,7 +83,7 @@ Page {
 		Button {
 			text: "Right"
 			onClicked: {
-				if(engine.canGo(labyrinth.ux, labyrinth.uy, "Right"))
+				if(engine.canGo(labyrinth.youx, labyrinth.youy, "Right"))
 					labyrinth.youx++
 			}
 		}
