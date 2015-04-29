@@ -39,6 +39,7 @@
 #include <QQuickView>
 
 #include "tools.h"
+#include "mazeengine.h"
 
 int main(int argc, char *argv[])
 {
@@ -51,8 +52,9 @@ int main(int argc, char *argv[])
 	//
 	// To display the view, call "show()" (will show fullscreen on device).
 
-	QGuiApplication *app(SailfishApp::application(argc, argv));
-	QQuickView *view(SailfishApp::createView());
+	QScopedPointer<QGuiApplication> app(SailfishApp::application(argc, argv));
+	qmlRegisterType<MazeEngine>("harbour.minotaur.maze", 1, 0, "MazeEngine");
+	QScopedPointer<QQuickView> view(SailfishApp::createView());
 	Tools* cpptools = new Tools();
 	view->rootContext()->setContextProperty("cpptools", cpptools);
 	view->setSource(SailfishApp::pathTo("qml/harbour-minotaur.qml"));

@@ -15,7 +15,8 @@ TARGET = harbour-minotaur
 CONFIG += sailfishapp
 
 SOURCES += src/harbour-minotaur.cpp \
-    src/tools.cpp
+    src/tools.cpp \
+    src/mazeengine.cpp
 
 OTHER_FILES += qml/harbour-minotaur.qml \
     qml/cover/CoverPage.qml \
@@ -38,5 +39,6 @@ CONFIG += sailfishapp_i18n
 #TRANSLATIONS += translations/harbour-minotaur-de.ts
 
 HEADERS += \
-    src/tools.h
+    src/tools.h \
+    src/mazeengine.h
 
