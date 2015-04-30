@@ -1,7 +1,16 @@
 #include "mazeengine.h"
 #include <QDebug>
 
-MazeEngine::MazeEngine(QObject *parent, int dimension) :
+direction getOppositeDirection(direction d) {
+	static direction opposite[] = { Down, Up, Right, Left };
+	return opposite[d];
+}
+
+bool operator ==(pass a, pass b) {
+	return ( a.s == b.s && a.e == b.e && a.d == b.d );
+}
+
+MazeEngine::MazeEngine(QObject *parent) :
 	QObject(parent) {
 }
 
@@ -15,8 +24,8 @@ void MazeEngine::setDimension(int dimension) {
 		_mazesize = dimension;
 		dimensionChanged();
 		pass p;
-		for (int i = 0; i < dimension; i++)
-			for (int j = 0; j < dimension; j++) {
+		for (int i = 0; i < _mazesize; i++) {
+			for (int j = 0; j < _mazesize; j++) {
 				p.s = QPoint(i, j);
 
 				if(j > 0) {
@@ -43,6 +52,33 @@ void MazeEngine::setDimension(int dimension) {
 					_passes.append(p);
 				}
 			}
+			for(int g = 0; g < 5; g++) {
+				p.s = QPoint(rand() % _mazesize, i);
+				switch (rand() % 4) {
+				case 0:
+					p.d = Up;
+					p.e = p.s + QPoint(0, -1);
+					break;
+				case 1:
+					p.d = Down;
+					p.e = p.s + QPoint(0, 1);
+					break;
+				case 2:
+					p.d = Left;
+					p.e = p.s + QPoint(-1, 0);
+					break;
+				case 3:
+					p.d = Right;
+					p.e = p.s + QPoint(1, 0);
+					break;
+				}
+				qDebug() << p.s.x() << p.s.y();
+				_passes.removeOne(p);
+				std::swap(p.s, p.e);
+				p.d = getOppositeDirection(p.d);
+				_passes.removeOne(p);
+			}
+		}
 	}
 }
 

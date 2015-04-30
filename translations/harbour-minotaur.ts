@@ -11,7 +11,7 @@
 <context>
     <name>GamePage</name>
     <message>
-        <source>Minotaur. Level 1</source>
+        <source>Level 1</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
