@@ -1,3 +1,22 @@
+/*
+ * Copyright © 2015 Andrew Penkrat
+ *
+ * This file is part of Minotaur.
+ *
+ * Minotaur is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Minotaur is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Minotaur.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import harbour.minotaur.maze 1.0
@@ -7,7 +26,8 @@ Page {
 
 	property int size: 11
 	property int wallWidth: 4
-	property var walls: []
+	// We store known walls as a string consisting of elements looking like \x\y\l or \x\y\t. l and t mean left and top sides of the cell.
+	property string walls: ""
 
 	MazeEngine {
 		id: engine
@@ -34,78 +54,228 @@ Page {
 
 			property int youx: size/2
 			property int youy: size/2
+			//TODO: Implement player's coordinates in MazeEngine
 
-			//Vertical column
+			// Vertical column
 			Column {
+				id: rootContainer
+				state: "default"
+
 				Repeater {
-					model: size
+					model: size + 2
 
-					//With 10 horizontal rows in it
+					// With 13 horizontal rows in it
 					Row {
-						property int ly: index
+						property int ly: index - 1
 						Repeater {
-							model: size
+							model: size + 2
 
-							//With 10 rectangles in each one
+							// With 13 rectangles in each one
 							Rectangle {
-								property int lx: index
+								property int lx: index - 1
 								width: labyrinth.width / size
 								height: labyrinth.height / size
-								color: (lx == labyrinth.youx && ly == labyrinth.youy) ? "magenta" : "transparent"
+								color: (lx == ~~(size / 2) && ly == ~~(size / 2)) ? "magenta" : "transparent"
 
 								Rectangle {
 									id: topB
-									property bool isWall: walls.indexOf(lx + "\\" + ly + "\\t") >= 0
+									property bool isWall: walls.split("\n").indexOf(lx + "\\" + ly + "\\t") >= 0
 									property int bWidth: isWall ? wallWidth : 1
 									anchors {
 										verticalCenter: parent.top
 										left: angleB.right
 										right: parent.right
-										//leftMargin: bWidth / 2
 										rightMargin: bWidth / 2
 									}
-									visible: ly > 0
 									height: bWidth
 									color: isWall ? Theme.primaryColor : Theme.highlightColor
 								}
 
 								Rectangle {
 									id: leftB
-									property bool isWall: walls.indexOf(lx + "\\" + ly + "\\l") >= 0
-									onIsWallChanged: console.log(lx, ly, walls.length)
+									property bool isWall: walls.split("\n").indexOf(lx + "\\" + ly + "\\l") >= 0
 									property int bWidth: isWall ? wallWidth : 1
 									anchors {
 										horizontalCenter: parent.left
 										top: angleB.bottom
 										bottom: parent.bottom
-										//topMargin: bWidth / 2
 										bottomMargin: bWidth / 2
 									}
-									visible: lx > 0
 									width: bWidth
 									color: isWall ? Theme.primaryColor : Theme.highlightColor
 								}
 
 								Rectangle {
 									id: angleB
-									property bool isWall: walls.indexOf(lx + "\\" + ly + "\\l") >= 0 ||
-														  walls.indexOf(lx + "\\" + ly + "\\t") >= 0 ||
-														  walls.indexOf((lx - 1) + "\\" + ly + "\\t") >= 0 ||
-														  walls.indexOf(lx + "\\" + (ly - 1) + "\\l") >= 0
+									property bool isWall: walls.split("\n").indexOf(lx + "\\" + ly + "\\l") >= 0 ||
+														  walls.split("\n").indexOf(lx + "\\" + ly + "\\t") >= 0 ||
+														  walls.split("\n").indexOf((lx - 1) + "\\" + ly + "\\t") >= 0 ||
+														  walls.split("\n").indexOf(lx + "\\" + (ly - 1) + "\\l") >= 0
 									anchors.verticalCenter: parent.top
 									anchors.horizontalCenter: parent.left
 									width: isWall ? wallWidth : 1
 									height: width
-									visible: lx * ly > 0
 									color: isWall ? Theme.primaryColor : Theme.highlightColor
 								}
 							}
 						}
 					}
 				}
+
+				states: [
+					State {
+						name: "default"
+						changes: PropertyChanges {
+							target: rootContainer
+							x: - labyrinth.width / size
+							y: - labyrinth.height / size
+						}
+					},
+					State {
+						name: "movingUp"
+						changes: PropertyChanges {
+							target: rootContainer
+							x: - labyrinth.width / size
+							y: 0
+						}
+					},
+					State {
+						name: "movingDown"
+						changes: PropertyChanges {
+							target: rootContainer
+							x: - labyrinth.width / size
+							y: -2 * labyrinth.height / size
+						}
+					},
+					State {
+						name: "movingLeft"
+						changes: PropertyChanges {
+							target: rootContainer
+							x: 0
+							y: - labyrinth.height / size
+						}
+					},
+					State {
+						name: "movingRight"
+						changes: PropertyChanges {
+							target: rootContainer
+							x: -2 * labyrinth.width / size
+							y: - labyrinth.height / size
+						}
+					}]
+
+				transitions: [
+					Transition {
+						to: "movingUp,movingDown,movingLeft,movingRight"
+						PropertyAnimation {
+							easing.type: Easing.InOutQuad
+							properties: "x,y"
+							duration: 300
+						}
+
+						onRunningChanged: {
+							if(!running) {
+								var newWalls = ""
+								var wsplit = walls.split("\n")
+								var i, wcoords
+								for(i in wsplit) {
+									if(wsplit[i]) {
+										wcoords = wsplit[i].split("\\")
+										switch (rootContainer.state) {
+										case "movingUp":
+											wsplit[i] = wcoords[0] + "\\" + (parseInt(wcoords[1]) + 1) + "\\" + wcoords[2] + "\n"
+											break
+										case "movingDown":
+											wsplit[i] = wcoords[0] + "\\" + (parseInt(wcoords[1]) - 1) + "\\" + wcoords[2] + "\n"
+											break
+										case "movingLeft":
+											wsplit[i] = (parseInt(wcoords[0]) + 1) + "\\" + wcoords[1] + "\\" + wcoords[2] + "\n"
+											break
+										case "movingRight":
+											wsplit[i] = (parseInt(wcoords[0]) - 1) + "\\" + wcoords[1] + "\\" + wcoords[2] + "\n"
+											break
+										}
+										newWalls += wsplit[i]
+									}
+								}
+								walls = newWalls
+								rootContainer.state = "default"
+							}
+						}
+					}]
+			}
+
+			MouseArea {
+				anchors.fill: parent
+				preventStealing: true
+				property int oldX
+				property int oldY
+				onPressed: {
+					oldX = mouseX
+					oldY = mouseY
+				}
+				onReleased: {
+					if(rootContainer.state == "default") {
+						if(Math.abs(mouseY - oldY) > Math.abs(mouseX - oldX) + 20) {
+							// Vertical swipe
+							if(mouseY > oldY) {
+								// Top to bottom
+								if(engine.canGo(labyrinth.youx, labyrinth.youy, "Down")) {
+									labyrinth.youy++
+									rootContainer.state = "movingDown"
+								}
+								else {
+									if(walls.split("\n").indexOf(~~(size / 2) + "\\" + (~~(size / 2) + 1) + "\\t") < 0) {
+										walls += ~~(size / 2) + "\\" + (~~(size / 2) + 1) + "\\t\n"
+									}
+								}
+							}
+							else {
+								// Bottom to top
+								if(engine.canGo(labyrinth.youx, labyrinth.youy, "Up")) {
+									labyrinth.youy--
+									rootContainer.state = "movingUp"
+								}
+								else {
+									if(walls.split("\n").indexOf(~~(size / 2) + "\\" + ~~(size / 2) + "\\t") < 0) {
+										walls += ~~(size / 2) + "\\" + ~~(size / 2) + "\\t\n"
+									}
+								}
+							}
+						}
+						if(Math.abs(mouseX - oldX) > Math.abs(mouseY - oldY) + 20) {
+							// Horizontal swipe
+							if(mouseX > oldX) {
+								// Left to right
+								if(engine.canGo(labyrinth.youx, labyrinth.youy, "Right")) {
+									labyrinth.youx++
+									rootContainer.state = "movingRight"
+								}
+								else {
+									if(walls.split("\n").indexOf((~~(size / 2) + 1) + "\\" + ~~(size / 2) + "\\l") < 0) {
+										walls += (~~(size / 2) + 1) + "\\" + ~~(size / 2) + "\\l\n"
+									}
+								}
+							}
+							else {
+								// Right to left
+								if(engine.canGo(labyrinth.youx, labyrinth.youy, "Left")) {
+									labyrinth.youx--
+									rootContainer.state = "movingLeft"
+								}
+								else {
+									if(walls.split("\n").indexOf(~~(size / 2) + "\\" + ~~(size / 2) + "\\l") < 0) {
+										walls += ~~(size / 2) + "\\" + ~~(size / 2) + "\\l\n"
+									}
+								}
+							}
+						}
+					}
+				}
+				onDoubleClicked: console.log(walls)
 			}
 		}
-		//Now here're some messy machinations with opacity effects
+		// Now here're some dirty machinations with opacity effects
 		OpacityRampEffect {
 			id: eff1
 			sourceItem: labyrinth
@@ -133,51 +303,6 @@ Page {
 			direction: OpacityRamp.BottomToTop
 			offset: 0.8
 			slope: 5
-		}
-
-		Button {
-			text: "Up"
-			onClicked: {
-				if(engine.canGo(labyrinth.youx, labyrinth.youy, "Up"))
-					labyrinth.youy--
-				else {
-					if(walls.indexOf(labyrinth.youx + "\\" + labyrinth.youy + "\\t") < 0)
-						walls = walls + [labyrinth.youx + "\\" + labyrinth.youy + "\\t"]
-				}
-			}
-		}
-		Button {
-			text: "Down"
-			onClicked: {
-				if(engine.canGo(labyrinth.youx, labyrinth.youy, "Down"))
-					labyrinth.youy++
-				else {
-					if(walls.indexOf(labyrinth.youx + "\\" + (labyrinth.youy + 1) + "\\t") < 0)
-						walls = walls + [labyrinth.youx + "\\" + (labyrinth.youy + 1) + "\\t"]
-				}
-			}
-		}
-		Button {
-			text: "Left"
-			onClicked: {
-				if(engine.canGo(labyrinth.youx, labyrinth.youy, "Left"))
-					labyrinth.youx--
-				else {
-					if(walls.indexOf(labyrinth.youx + "\\" + labyrinth.youy + "\\l") < 0)
-						walls = walls + [labyrinth.youx + "\\" + labyrinth.youy + "\\l"]
-				}
-			}
-		}
-		Button {
-			text: "Right"
-			onClicked: {
-				if(engine.canGo(labyrinth.youx, labyrinth.youy, "Right"))
-					labyrinth.youx++
-				else {
-					if(walls.indexOf((labyrinth.youx + 1) + "\\" + labyrinth.youy + "\\l") < 0)
-						walls = walls + [(labyrinth.youx + 1) + "\\" + labyrinth.youy + "\\l"]
-				}
-			}
 		}
 	}
 }
