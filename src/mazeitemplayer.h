@@ -17,44 +17,16 @@
  * along with Minotaur.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MAZEENGINE_H
-#define MAZEENGINE_H
+#ifndef MAZEITEMPLAYER_H
+#define MAZEITEMPLAYER_H
 
-#include <QObject>
-#include <QPoint>
 #include "mazeitem.h"
 
-class MazeItem;
-
-enum direction { Up, Down, Left, Right };
-direction getOppositeDirection(direction d);
-
-struct pass {
-	QPoint s;
-	QPoint e;
-	direction d;
-};
-bool operator ==(pass a, pass b);
-
-class MazeEngine : public QObject
+class MazeItemPlayer : public MazeItem
 {
 	Q_OBJECT
 public:
-	explicit MazeEngine(QObject *parent = 0);
-	Q_INVOKABLE void generateRandom(int size);
-	Q_INVOKABLE bool canGo(int x, int y, QString dir);
-	bool canGo(QPoint location, QString dir);
-	void registerItem(MazeItem *item);
-
-signals:
-	void intersect(MazeItem *item1, MazeItem *item2);
-
-public slots:
-	void checkIntersection(MazeItem *item);
-
-private:
-	QList<pass> _passes;
-	QList<MazeItem*> _items;
+	explicit MazeItemPlayer(QObject *parent = 0);
 };
 
-#endif // MAZEENGINE_H
+#endif // MAZEITEMPLAYER_H

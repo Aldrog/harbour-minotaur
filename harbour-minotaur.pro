@@ -16,7 +16,11 @@ CONFIG += sailfishapp
 
 SOURCES += src/harbour-minotaur.cpp \
     src/tools.cpp \
-    src/mazeengine.cpp
+    src/mazeengine.cpp \
+    src/mazeitem.cpp \
+    src/mazeitemexit.cpp \
+    src/mazeitemplayer.cpp \
+    src/mazeitemchest.cpp
 
 OTHER_FILES += qml/harbour-minotaur.qml \
     qml/cover/CoverPage.qml \
@@ -41,5 +45,9 @@ CONFIG += sailfishapp_i18n
 
 HEADERS += \
     src/tools.h \
-    src/mazeengine.h
+    src/mazeengine.h \
+    src/mazeitem.h \
+    src/mazeitemexit.h \
+    src/mazeitemplayer.h \
+    src/mazeitemchest.h
 

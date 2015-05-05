@@ -17,44 +17,46 @@
  * along with Minotaur.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MAZEENGINE_H
-#define MAZEENGINE_H
+#ifndef MAZEITEM_H
+#define MAZEITEM_H
 
 #include <QObject>
 #include <QPoint>
-#include "mazeitem.h"
+#include "mazeengine.h"
 
-class MazeItem;
+class MazeEngine;
 
-enum direction { Up, Down, Left, Right };
-direction getOppositeDirection(direction d);
-
-struct pass {
-	QPoint s;
-	QPoint e;
-	direction d;
-};
-bool operator ==(pass a, pass b);
-
-class MazeEngine : public QObject
+class MazeItem : public QObject
 {
 	Q_OBJECT
 public:
-	explicit MazeEngine(QObject *parent = 0);
-	Q_INVOKABLE void generateRandom(int size);
-	Q_INVOKABLE bool canGo(int x, int y, QString dir);
-	bool canGo(QPoint location, QString dir);
-	void registerItem(MazeItem *item);
+	explicit MazeItem(QObject *parent = 0);
+	Q_PROPERTY(MazeEngine *engine READ engine WRITE setEngine NOTIFY engineChanged)
+	Q_PROPERTY(QPoint location READ location WRITE setLocation NOTIFY locationChanged)
+
+	Q_INVOKABLE bool move(QString direction);
+	MazeEngine *engine();
+	void setEngine(MazeEngine *engine);
+	QPoint location();
+	void setLocation(QPoint location);
+	bool killable;
+	bool killing;
+	bool pickable;
+	bool picking;
 
 signals:
-	void intersect(MazeItem *item1, MazeItem *item2);
+	void engineChanged();
+	void locationChanged(MazeItem *item);
+	void wasKilled();
+	void wasPicked();
+
 
 public slots:
-	void checkIntersection(MazeItem *item);
+	void intersected(MazeItem *item);
 
 private:
-	QList<pass> _passes;
-	QList<MazeItem*> _items;
+	MazeEngine *_engine;
+	QPoint _location;
 };
 
-#endif // MAZEENGINE_H
+#endif // MAZEITEM_H
