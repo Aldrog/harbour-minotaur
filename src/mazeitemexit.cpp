@@ -18,6 +18,7 @@
  */
 
 #include "mazeitemexit.h"
+#include <QDebug>
 
 MazeItemExit::MazeItemExit(QObject *parent) :
 	MazeItem(parent) {
@@ -25,4 +26,8 @@ MazeItemExit::MazeItemExit(QObject *parent) :
 	killing = false;
 	pickable = false;
 	picking = false;
+}
+
+void MazeItemExit::intersected(MazeItem *item) {
+	emit item->outOfMaze();
 }

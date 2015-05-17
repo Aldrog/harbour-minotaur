@@ -18,6 +18,7 @@
  */
 
 #include "mazeengine.h"
+#include "mazeitemexit.h"
 #include <QDebug>
 
 direction getOppositeDirection(direction d) {
@@ -32,39 +33,67 @@ bool operator ==(pass a, pass b) {
 MazeEngine::MazeEngine(QObject *parent) :
 	QObject(parent) {
 }
+MazeEngine::~MazeEngine() {
+	foreach (MazeItem *i, _items) {
+		delete i;
+	}
+}
 
 void MazeEngine::generateRandom(int size) {
 	pass p;
+	// Fill maze with passes but leave walls on the sides.
+	int exitNumber = rand() % (size * 4);
 	for (int i = 0; i < size; i++) {
 		for (int j = 0; j < size; j++) {
 			p.s = QPoint(i, j);
 
-			if(j > 0) {
+            if(j > 0 || i == exitNumber) {
 				p.d = Up;
 				p.e = QPoint(i, j - 1);
 				_passes.append(p);
-			}
+				if(j == 0) {
+					MazeItemExit *ex = new MazeItemExit();
+                    ex->setEngine(this);
+					ex->setLocation(p.e);
+                }
+            }
 
-			if(j < size - 1) {
+			if(j < size - 1 || size + i == exitNumber) {
 				p.d = Down;
 				p.e = QPoint(i, j + 1);
 				_passes.append(p);
+				if(j == size - 1) {
+					MazeItemExit *ex = new MazeItemExit();
+					ex->setEngine(this);
+					ex->setLocation(p.e);
+                }
 			}
 
-			if(i > 0) {
+			if(i > 0 || 2*size + j == exitNumber) {
 				p.d = Left;
 				p.e = QPoint(i - 1, j);
 				_passes.append(p);
+				if(i == 0) {
+					MazeItemExit *ex = new MazeItemExit();
+					ex->setEngine(this);
+					ex->setLocation(p.e);
+                }
 			}
 
-			if(i < size - 1) {
+			if(i < size - 1 || 3*size + j == exitNumber) {
 				p.d = Right;
 				p.e = QPoint(i + 1, j);
 				_passes.append(p);
-			}
+				if(i == size - 1) {
+					MazeItemExit *ex = new MazeItemExit();
+					ex->setEngine(this);
+					ex->setLocation(p.e);
+                }
+            }
 		}
 	}
 
+    // Generate random walls
 	for (int i = 0; i < size; i++) {
 		for(int g = 0; g < 5; g++) {
 			p.s = QPoint(rand() % size, i);
@@ -92,10 +121,6 @@ void MazeEngine::generateRandom(int size) {
 			_passes.removeOne(p);
 		}
 	}
-}
-
-bool MazeEngine::canGo(int x, int y, QString dir) {
-	return canGo(QPoint(x, y), dir);
 }
 
 bool MazeEngine::canGo(QPoint location, QString dir) {
@@ -132,10 +157,16 @@ void MazeEngine::registerItem(MazeItem *item) {
 	connect(item, SIGNAL(locationChanged(MazeItem*)), this, SLOT(checkIntersection(MazeItem*)));
 }
 
+void MazeEngine::removeItem(MazeItem *item) {
+	qDebug() << "item removed";
+	_items.removeAll(item);
+}
+
 void MazeEngine::checkIntersection(MazeItem *item) {
 	foreach (MazeItem *i, _items) {
 		if(i != item && i->location() == item->location()) {
-			emit intersect(item, i);
+			qDebug() << "Intersection detected!";
+			emit intersection(item, i);
 			item->intersected(i);
 			i->intersected(item);
 		}

@@ -21,7 +21,12 @@
 #include <QDebug>
 
 MazeItem::MazeItem(QObject *parent) :
-	QObject(parent) {}
+	QObject(parent),
+	_engine(NULL){}
+MazeItem::~MazeItem() {
+	if(_engine)
+		_engine->removeItem(this);
+}
 
 MazeEngine *MazeItem::engine() {
 	return _engine;
@@ -29,7 +34,8 @@ MazeEngine *MazeItem::engine() {
 
 void MazeItem::setEngine(MazeEngine *engine) {
 	if(engine != _engine) {
-		//TODO: Implement removing item from engine
+		if(_engine)
+			_engine->removeItem(this);
 		_engine = engine;
 		engine->registerItem(this);
 		emit engineChanged();

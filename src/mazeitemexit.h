@@ -27,6 +27,9 @@ class MazeItemExit : public MazeItem
 	Q_OBJECT
 public:
 	explicit MazeItemExit(QObject *parent = 0);
+
+public slots:
+    void intersected(MazeItem *item);
 };
 
 #endif // MAZEITEMEXIT_H

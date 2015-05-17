@@ -31,6 +31,7 @@ class MazeItem : public QObject
 	Q_OBJECT
 public:
 	explicit MazeItem(QObject *parent = 0);
+	~MazeItem();
 	Q_PROPERTY(MazeEngine *engine READ engine WRITE setEngine NOTIFY engineChanged)
 	Q_PROPERTY(QPoint location READ location WRITE setLocation NOTIFY locationChanged)
 
@@ -49,10 +50,11 @@ signals:
 	void locationChanged(MazeItem *item);
 	void wasKilled();
 	void wasPicked();
+	void outOfMaze();
 
 
 public slots:
-	void intersected(MazeItem *item);
+	virtual void intersected(MazeItem *item);
 
 private:
 	MazeEngine *_engine;

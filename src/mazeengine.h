@@ -41,13 +41,15 @@ class MazeEngine : public QObject
 	Q_OBJECT
 public:
 	explicit MazeEngine(QObject *parent = 0);
+	~MazeEngine();
 	Q_INVOKABLE void generateRandom(int size);
-	Q_INVOKABLE bool canGo(int x, int y, QString dir);
-	bool canGo(QPoint location, QString dir);
+	Q_INVOKABLE bool canGo(QPoint location, QString dir);
+	Q_INVOKABLE inline bool canGo(int x, int y, QString dir) { return canGo(QPoint(x, y), dir); }
 	void registerItem(MazeItem *item);
+	void removeItem(MazeItem *item);
 
 signals:
-	void intersect(MazeItem *item1, MazeItem *item2);
+	void intersection(MazeItem *item1, MazeItem *item2);
 
 public slots:
 	void checkIntersection(MazeItem *item);
