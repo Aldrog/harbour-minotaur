@@ -48,16 +48,16 @@ void MazeEngine::generateRandom(int size) {
 			p.s = QPoint(i, j);
 			availableLocations.append(p.s);
 
-            if(j > 0 || i == exitNumber) {
+			if(j > 0 || i == exitNumber) {
 				p.d = Up;
 				p.e = QPoint(i, j - 1);
 				_passes.append(p);
 				if(j == 0) {
 					MazeItemExit *ex = new MazeItemExit();
-                    ex->setEngine(this);
+					ex->setEngine(this);
 					ex->setLocation(p.e);
-                }
-            }
+				}
+			}
 
 			if(j < size - 1 || size + i == exitNumber) {
 				p.d = Down;
@@ -67,7 +67,7 @@ void MazeEngine::generateRandom(int size) {
 					MazeItemExit *ex = new MazeItemExit();
 					ex->setEngine(this);
 					ex->setLocation(p.e);
-                }
+				}
 			}
 
 			if(i > 0 || 2*size + j == exitNumber) {
@@ -78,7 +78,7 @@ void MazeEngine::generateRandom(int size) {
 					MazeItemExit *ex = new MazeItemExit();
 					ex->setEngine(this);
 					ex->setLocation(p.e);
-                }
+				}
 			}
 
 			if(i < size - 1 || 3*size + j == exitNumber) {
@@ -89,37 +89,100 @@ void MazeEngine::generateRandom(int size) {
 					MazeItemExit *ex = new MazeItemExit();
 					ex->setEngine(this);
 					ex->setLocation(p.e);
-                }
-            }
+				}
+			}
 		}
 	}
 
-    // Generate random walls
-	for (int i = 0; i < size; i++) {
-		for(int g = 0; g < 5; g++) {
-			p.s = QPoint(rand() % size, i);
-			switch (rand() % 4) {
+	// Generate random walls
+	foreach (QPoint i, availableLocations) {
+		if (availableLocations.contains(i + QPoint(0,1)) &&
+				availableLocations.contains(i + QPoint(1,0)) &&
+				availableLocations.contains(i + QPoint(1,1))) {
+
+			switch(rand() % 4) {
 			case 0:
-				p.d = Up;
-				p.e = p.s + QPoint(0, -1);
+				p.s = i;
+				p.e = i + QPoint(0,1);
+				p.d = Down;
 				break;
 			case 1:
-				p.d = Down;
-				p.e = p.s + QPoint(0, 1);
+				p.s = i;
+				p.e = i + QPoint(1,0);
+				p.d = Right;
 				break;
 			case 2:
-				p.d = Left;
-				p.e = p.s + QPoint(-1, 0);
+				p.s = i + QPoint(0,1);
+				p.e = i + QPoint(1,1);
+				p.d = Right;
 				break;
 			case 3:
-				p.d = Right;
-				p.e = p.s + QPoint(1, 0);
+				p.s = i + QPoint(1,0);
+				p.e = i + QPoint(1,1);
+				p.d = Down;
 				break;
 			}
-			_passes.removeOne(p);
+			_passes.removeAll(p);
 			std::swap(p.s, p.e);
 			p.d = getOppositeDirection(p.d);
-			_passes.removeOne(p);
+			_passes.removeAll(p);
+		}
+	}
+
+	// Now check for pass blockers and get rid of them
+	foreach (QPoint i, availableLocations) {
+		if(!canGo(i, "Up") && !canGo(i, "Down") && !canGo(i, "Left") && !canGo(i, "Right")) {
+			p.s = i;
+			bool blockerRemoved = false;
+			while(!blockerRemoved) {
+				qDebug() << "trying to remove blocker";
+				switch(rand() % 4) {
+				case 0:
+					p.e = i + QPoint(0,-1);
+					p.d = Up;
+					if(availableLocations.contains(p.e)) {
+						_passes.append(p);
+						std::swap(p.s, p.e);
+						p.d = getOppositeDirection(p.d);
+						_passes.append(p);
+						blockerRemoved = true;
+					}
+					break;
+				case 1:
+					p.e = i + QPoint(0,1);
+					p.d = Down;
+					if(availableLocations.contains(p.e)) {
+						_passes.append(p);
+						std::swap(p.s, p.e);
+						p.d = getOppositeDirection(p.d);
+						_passes.append(p);
+						blockerRemoved = true;
+					}
+					break;
+				case 2:
+					p.e = i + QPoint(-1,0);
+					p.d = Left;
+					if(availableLocations.contains(p.e)) {
+						_passes.append(p);
+						std::swap(p.s, p.e);
+						p.d = getOppositeDirection(p.d);
+						_passes.append(p);
+						blockerRemoved = true;
+					}
+					break;
+				case 3:
+					p.e = i + QPoint(1,0);
+					p.d = Right;
+					if(availableLocations.contains(p.e)) {
+						_passes.append(p);
+						std::swap(p.s, p.e);
+						p.d = getOppositeDirection(p.d);
+						_passes.append(p);
+						blockerRemoved = true;
+					}
+					break;
+				}
+			}
 		}
 	}
 }
@@ -153,7 +216,7 @@ bool MazeEngine::canGo(QPoint location, QString dir) {
 }
 
 void MazeEngine::registerItem(MazeItem *item) {
-	qDebug() << "item added" << item->currentTurn();
+	qDebug() << "item added";
 	_items.append(item);
 	connect(item, SIGNAL(locationChanged(MazeItem*)), this, SLOT(checkIntersection(MazeItem*)));
 	// Movable items have turns
@@ -174,7 +237,6 @@ void MazeEngine::registerItem(MazeItem *item) {
 		_turns.append(item);
 		connect(item, SIGNAL(turnEnded()), this, SLOT(switchTurn()));
 	}
-	qDebug() << "item added 2";
 }
 
 void MazeEngine::removeItem(MazeItem *item) {
