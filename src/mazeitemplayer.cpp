@@ -26,4 +26,5 @@ MazeItemPlayer::MazeItemPlayer(QObject *parent) :
 	pickable = false;
 	picker = true;
 	movable = true;
+	setLocation(QPoint(1,1));
 }

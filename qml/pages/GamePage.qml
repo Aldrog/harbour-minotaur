@@ -32,13 +32,15 @@ Page {
 
 	MazeEngine {
 		id: engine
-		Component.onCompleted: generateRandom(10)
+		Component.onCompleted: {
+			generateRandom(10)
+			player.randLocation()
+		}
 	}
 	MazeItemPlayer {
 		id: player
 		engine: engine
 		currentTurn: true
-		location: Qt.point(Math.floor(Math.random() * 10), Math.floor(Math.random() * 10));
 
 		onOutOfMaze: pageStack.replace(Qt.resolvedUrl("WinPage.qml"))
 	}

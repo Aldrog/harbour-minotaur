@@ -76,7 +76,8 @@ bool MazeItem::move(QString direction) {
 }
 
 void MazeItem::randLocation() {
-	// Need some way to get allowed locations from engine
+	qDebug() << "choosing random location from" << _engine->availableLocations.count() << "variants";
+	setLocation(_engine->availableLocations.at(rand() % _engine->availableLocations.count()));
 }
 
 void MazeItem::intersected(MazeItem *item) {

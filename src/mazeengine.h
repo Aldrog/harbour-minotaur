@@ -48,6 +48,8 @@ public:
 	void registerItem(MazeItem *item);
 	void removeItem(MazeItem *item);
 
+	QList<QPoint> availableLocations;
+
 signals:
 	void intersection(MazeItem *item1, MazeItem *item2);
 

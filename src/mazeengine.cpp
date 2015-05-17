@@ -46,6 +46,7 @@ void MazeEngine::generateRandom(int size) {
 	for (int i = 0; i < size; i++) {
 		for (int j = 0; j < size; j++) {
 			p.s = QPoint(i, j);
+			availableLocations.append(p.s);
 
             if(j > 0 || i == exitNumber) {
 				p.d = Up;
@@ -152,7 +153,7 @@ bool MazeEngine::canGo(QPoint location, QString dir) {
 }
 
 void MazeEngine::registerItem(MazeItem *item) {
-	qDebug() << "item added";
+	qDebug() << "item added" << item->currentTurn();
 	_items.append(item);
 	connect(item, SIGNAL(locationChanged(MazeItem*)), this, SLOT(checkIntersection(MazeItem*)));
 	// Movable items have turns
@@ -173,6 +174,7 @@ void MazeEngine::registerItem(MazeItem *item) {
 		_turns.append(item);
 		connect(item, SIGNAL(turnEnded()), this, SLOT(switchTurn()));
 	}
+	qDebug() << "item added 2";
 }
 
 void MazeEngine::removeItem(MazeItem *item) {
