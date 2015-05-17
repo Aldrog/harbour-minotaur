@@ -155,6 +155,24 @@ void MazeEngine::registerItem(MazeItem *item) {
 	qDebug() << "item added";
 	_items.append(item);
 	connect(item, SIGNAL(locationChanged(MazeItem*)), this, SLOT(checkIntersection(MazeItem*)));
+	// Movable items have turns
+	if(item->movable) {
+		// If added item is marked as having current turn, remove this mark from all other items
+		if(item->currentTurn()) {
+			foreach (MazeItem *i, _turns) {
+				i->setCurrentTurn(false);
+			}
+		} else {
+			// If no item has current turn mark, add it to this item
+			item->setCurrentTurn(true);
+			foreach (MazeItem *i, _turns) {
+				if(i->currentTurn())
+					item->setCurrentTurn(false);
+			}
+		}
+		_turns.append(item);
+		connect(item, SIGNAL(turnEnded()), this, SLOT(switchTurn()));
+	}
 }
 
 void MazeEngine::removeItem(MazeItem *item) {
@@ -165,10 +183,26 @@ void MazeEngine::removeItem(MazeItem *item) {
 void MazeEngine::checkIntersection(MazeItem *item) {
 	foreach (MazeItem *i, _items) {
 		if(i != item && i->location() == item->location()) {
-			qDebug() << "Intersection detected!";
+			qDebug() << "Intersection detected";
 			emit intersection(item, i);
 			item->intersected(i);
 			i->intersected(item);
 		}
 	}
+}
+
+void MazeEngine::switchTurn() {
+	bool switchFlag = false;
+	foreach (MazeItem *i, _turns) {
+		if(switchFlag) {
+			i->setCurrentTurn(true);
+			switchFlag = false;
+		}
+		else if(i->currentTurn()) {
+			i->setCurrentTurn(false);
+			switchFlag = true;
+		}
+	}
+	if(switchFlag)
+		_turns.first()->setCurrentTurn(true);
 }

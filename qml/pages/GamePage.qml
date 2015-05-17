@@ -37,6 +37,7 @@ Page {
 	MazeItemPlayer {
 		id: player
 		engine: engine
+		currentTurn: true
 		location: Qt.point(Math.floor(Math.random() * 10), Math.floor(Math.random() * 10));
 
 		onOutOfMaze: pageStack.replace(Qt.resolvedUrl("WinPage.qml"))
@@ -221,7 +222,7 @@ Page {
 				oldY = mouseY
 			}
 			onReleased: {
-				if(rootContainer.state == "default") {
+				if(rootContainer.state == "default" && player.currentTurn) {
 					if(Math.abs(mouseY - oldY) > Math.abs(mouseX - oldX) + 20) {
 						// Vertical swipe
 						if(mouseY > oldY) {

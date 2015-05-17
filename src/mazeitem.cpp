@@ -22,14 +22,11 @@
 
 MazeItem::MazeItem(QObject *parent) :
 	QObject(parent),
-	_engine(NULL){}
+	_engine(NULL),
+	_turn(false){}
 MazeItem::~MazeItem() {
 	if(_engine)
 		_engine->removeItem(this);
-}
-
-MazeEngine *MazeItem::engine() {
-	return _engine;
 }
 
 void MazeItem::setEngine(MazeEngine *engine) {
@@ -42,10 +39,6 @@ void MazeItem::setEngine(MazeEngine *engine) {
 	}
 }
 
-QPoint MazeItem::location() {
-	return _location;
-}
-
 void MazeItem::setLocation(QPoint location) {
 	if(location != _location) {
 		_location = location;
@@ -53,8 +46,15 @@ void MazeItem::setLocation(QPoint location) {
 	}
 }
 
+void MazeItem::setCurrentTurn(bool currentTurn) {
+	if(currentTurn != _turn) {
+		_turn = currentTurn;
+		emit currentTurnChanged();
+	}
+}
+
 bool MazeItem::move(QString direction) {
-	if(_engine) {
+	if(_engine && currentTurn()) {
 		if(_engine->canGo(_location, direction)) {
 			if(direction.toLower() == "up") {
 				setLocation(_location + QPoint(0, -1));
@@ -68,15 +68,20 @@ bool MazeItem::move(QString direction) {
 			if(direction.toLower() == "right") {
 				setLocation(_location + QPoint(1, 0));
 			}
+			emit turnEnded();
 			return true;
 		}
 	}
 	return false;
 }
 
+void MazeItem::randLocation() {
+	// Need some way to get allowed locations from engine
+}
+
 void MazeItem::intersected(MazeItem *item) {
-	if(this->killable && item->killing)
+	if(this->killable && item->killer)
 		emit wasKilled();
-	if(this->pickable && item->picking)
+	if(this->pickable && item->picker)
 		emit wasPicked();
 }

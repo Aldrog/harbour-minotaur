@@ -3,7 +3,8 @@
 MazeItemChest::MazeItemChest(QObject *parent) :
 	MazeItem(parent) {
 	killable = false;
-	killing = false;
+	killer = false;
 	pickable = true;
-	picking = false;
+	picker = false;
+	movable = false;
 }

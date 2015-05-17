@@ -22,7 +22,8 @@
 MazeItemPlayer::MazeItemPlayer(QObject *parent) :
 	MazeItem(parent) {
 	killable = true;
-	killing = false;
+	killer = false;
 	pickable = false;
-	picking = true;
+	picker = true;
+	movable = true;
 }

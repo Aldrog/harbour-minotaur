@@ -34,23 +34,30 @@ public:
 	~MazeItem();
 	Q_PROPERTY(MazeEngine *engine READ engine WRITE setEngine NOTIFY engineChanged)
 	Q_PROPERTY(QPoint location READ location WRITE setLocation NOTIFY locationChanged)
+	Q_PROPERTY(bool currentTurn READ currentTurn WRITE setCurrentTurn NOTIFY currentTurnChanged)
 
 	Q_INVOKABLE bool move(QString direction);
-	MazeEngine *engine();
+	Q_INVOKABLE void randLocation();
+	inline MazeEngine *engine()	{ return _engine; }
 	void setEngine(MazeEngine *engine);
-	QPoint location();
+	inline QPoint location()	{ return _location; }
 	void setLocation(QPoint location);
+	inline bool currentTurn()	{ return _turn; }
+	void setCurrentTurn(bool currentTurn);
 	bool killable;
-	bool killing;
+	bool killer;
 	bool pickable;
-	bool picking;
+	bool picker;
+	bool movable;
 
 signals:
 	void engineChanged();
 	void locationChanged(MazeItem *item);
+	void currentTurnChanged();
 	void wasKilled();
 	void wasPicked();
 	void outOfMaze();
+	void turnEnded();
 
 
 public slots:
@@ -59,6 +66,7 @@ public slots:
 private:
 	MazeEngine *_engine;
 	QPoint _location;
+	bool _turn;
 };
 
 #endif // MAZEITEM_H

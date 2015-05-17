@@ -23,9 +23,10 @@
 MazeItemExit::MazeItemExit(QObject *parent) :
 	MazeItem(parent) {
 	killable = false;
-	killing = false;
+	killer = false;
 	pickable = false;
-	picking = false;
+	picker = false;
+	movable = false;
 }
 
 void MazeItemExit::intersected(MazeItem *item) {

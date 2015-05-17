@@ -53,10 +53,12 @@ signals:
 
 public slots:
 	void checkIntersection(MazeItem *item);
+	void switchTurn();
 
 private:
 	QList<pass> _passes;
 	QList<MazeItem*> _items;
+	QList<MazeItem*> _turns;
 };
 
 #endif // MAZEENGINE_H
