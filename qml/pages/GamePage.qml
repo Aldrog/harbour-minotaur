@@ -23,20 +23,23 @@ import harbour.minotaur.maze 1.0
 
 Page {
 	id: page
+	allowedOrientations: Orientation.All
 
 	property int size: 9
 	property int wallWidth: 4
-	// We store known walls as a string consisting of elements looking like \x\y\l or \x\y\t. l and t mean left and top sides of the cell.
+	// We store known walls as a string consisting of lines looking like \x\y\l or \x\y\t. l and t mean left and top sides of the cell.
 	property string walls: ""
 
 	MazeEngine {
 		id: engine
-		Component.onCompleted: generateRandom(8)
+		Component.onCompleted: generateRandom(10)
 	}
 	MazeItemPlayer {
 		id: player
 		engine: engine
-		location: "4,4"
+		location: Qt.point(Math.floor(Math.random() * 10), Math.floor(Math.random() * 10));
+
+		onOutOfMaze: pageStack.replace(Qt.resolvedUrl("WinPage.qml"))
 	}
 
 	PageHeader {
@@ -89,6 +92,7 @@ Page {
 								}
 								height: bWidth
 								color: isWall ? Theme.primaryColor : Theme.highlightColor
+								opacity: isWall ? 1 : 0.75
 							}
 
 							Rectangle {
@@ -103,6 +107,7 @@ Page {
 								}
 								width: bWidth
 								color: isWall ? Theme.primaryColor : Theme.highlightColor
+								opacity: isWall ? 1 : 0.75
 							}
 
 							Rectangle {
@@ -116,6 +121,7 @@ Page {
 								width: isWall ? wallWidth : 1
 								height: width
 								color: isWall ? Theme.primaryColor : Theme.highlightColor
+								opacity: isWall ? 1 : 0.75
 							}
 						}
 					}
@@ -318,5 +324,50 @@ Page {
 			text: "Here could be <s>your advertisement</s><br> an inventory or a toolbar"
 			textFormat: Text.RichText
 		}
+	}
+
+	Rectangle {
+		id: background
+		anchors.fill: parent
+		color: "black"
+		visible: false
+	}
+
+	ShaderEffect {
+		z: -1
+		opacity: 0.3
+		anchors.fill: background
+		property variant src: background
+		property real r: labyrinth.width / 2
+		property real cx: labyrinth.x + labyrinth.width / 2
+		property real cy: labyrinth.y + labyrinth.height / 2
+		property real w: width
+		property real h: height
+
+		vertexShader: "
+			uniform highp mat4 qt_Matrix;
+			attribute highp vec4 qt_Vertex;
+			attribute highp vec2 qt_MultiTexCoord0;
+			varying highp vec2 coord;
+			void main() {
+				coord = qt_MultiTexCoord0;
+				gl_Position = qt_Matrix * qt_Vertex;
+			}"
+		fragmentShader: "
+			varying highp vec2 coord;
+			varying lowp float alfa;
+			uniform sampler2D src;
+			uniform lowp float r;
+			uniform lowp float cx;
+			uniform lowp float cy;
+			uniform lowp float w;
+			uniform lowp float h;
+			uniform lowp float qt_Opacity;
+			void main() {
+				lowp float alfa = (pow(coord.x*w-cx,2.0)+pow(coord.y*h-cy,2.0)) / (r*r);
+				if(alfa > 1.0)
+					alfa = 1.0;
+				gl_FragColor = texture2D(src, coord) * qt_Opacity * alfa;
+			}"
 	}
 }

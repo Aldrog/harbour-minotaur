@@ -26,4 +26,21 @@
         <translation type="unfinished"></translation>
     </message>
 </context>
+<context>
+    <name>WinPage</name>
+    <message>
+        <source>Congratulations!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>You have managed to find a door leading outside of the labyrinth.
+
+Good job, adventurer!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Goodbye!</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
 </TS>

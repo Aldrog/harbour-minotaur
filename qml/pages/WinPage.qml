@@ -20,25 +20,36 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 
-
 Page {
 	id: page
 	allowedOrientations: Orientation.All
 
-	Column {
-		anchors.centerIn: parent
-		spacing: 10
-
-		Button {
-			text: qsTr("Play")
-			onClicked: pageStack.push(Qt.resolvedUrl("GamePage.qml"))
+		PageHeader {
+			id: header
+			title: qsTr("Congratulations!")
 		}
 
-		Button {
-			text: qsTr("Quit")
-			onClicked: cpptools.quit()
+		Label {
+			id: winningText
+			anchors {
+				top: header.bottom
+				left: parent.left
+				right: parent.right
+				margins: Theme.paddingLarge
+			}
+			text: qsTr("You have managed to find a door leading outside of the labyrinth.\n\nGood job, adventurer!")
+			//horizontalAlignment: Text.AlignHCenter
+			wrapMode: Text.WordWrap
 		}
+
+	Button {
+		id: endButton
+		anchors {
+			bottom: parent.bottom
+			horizontalCenter: parent.horizontalCenter
+			margins: Theme.paddingLarge
+		}
+		text: qsTr("Goodbye!")
+		onClicked: pageStack.pop()
 	}
 }
-
-
