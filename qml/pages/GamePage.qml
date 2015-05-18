@@ -35,6 +35,7 @@ Page {
 		Component.onCompleted: {
 			generateRandom(10)
 			player.randLocation()
+			minotaur.randLocation()
 		}
 	}
 	MazeItemPlayer {
@@ -43,6 +44,10 @@ Page {
 		currentTurn: true
 
 		onOutOfMaze: pageStack.replace(Qt.resolvedUrl("WinPage.qml"))
+	}
+	MazeItemMinotaur {
+		id: minotaur
+		engine: engine
 	}
 
 	PageHeader {

@@ -50,12 +50,14 @@ void MazeItem::setCurrentTurn(bool currentTurn) {
 	if(currentTurn != _turn) {
 		_turn = currentTurn;
 		emit currentTurnChanged();
+		if(_turn)
+			emit turnStarted();
 	}
 }
 
 bool MazeItem::move(QString direction) {
-	if(_engine && currentTurn()) {
-		if(_engine->canGo(_location, direction)) {
+	if(_engine) {
+		if(currentTurn() && _engine->canGo(_location, direction)) {
 			if(direction.toLower() == "up") {
 				setLocation(_location + QPoint(0, -1));
 			}
@@ -71,6 +73,7 @@ bool MazeItem::move(QString direction) {
 			emit turnEnded();
 			return true;
 		}
+		emit turnEnded();
 	}
 	return false;
 }

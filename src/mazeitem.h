@@ -58,7 +58,7 @@ signals:
 	void wasPicked();
 	void outOfMaze();
 	void turnEnded();
-
+	void turnStarted();
 
 public slots:
 	virtual void intersected(MazeItem *item);

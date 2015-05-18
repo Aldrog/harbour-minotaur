@@ -20,7 +20,8 @@ SOURCES += src/harbour-minotaur.cpp \
     src/mazeitem.cpp \
     src/mazeitemexit.cpp \
     src/mazeitemplayer.cpp \
-    src/mazeitemchest.cpp
+    src/mazeitemchest.cpp \
+    src/mazeitemminotaur.cpp
 
 OTHER_FILES += qml/harbour-minotaur.qml \
     qml/cover/CoverPage.qml \
@@ -50,5 +51,6 @@ HEADERS += \
     src/mazeitem.h \
     src/mazeitemexit.h \
     src/mazeitemplayer.h \
-    src/mazeitemchest.h
+    src/mazeitemchest.h \
+    src/mazeitemminotaur.h
 

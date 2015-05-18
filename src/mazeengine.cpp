@@ -265,6 +265,7 @@ void MazeEngine::generateRandom(int size) {
 				qDebug() << "Two-cells blocker removed";
 			}
 		}
+		// I've never seen unreachable territory more then two cells sized
 	}
 }
 
@@ -302,17 +303,10 @@ void MazeEngine::registerItem(MazeItem *item) {
 	connect(item, SIGNAL(locationChanged(MazeItem*)), this, SLOT(checkIntersection(MazeItem*)));
 	// Movable items have turns
 	if(item->movable) {
-		// If added item is marked as having current turn, remove this mark from all other items
+		// If added item is marked as having current turn, remove this mark from all other items. Just for the case.
 		if(item->currentTurn()) {
 			foreach (MazeItem *i, _turns) {
 				i->setCurrentTurn(false);
-			}
-		} else {
-			// If no item has current turn mark, add it to this item
-			item->setCurrentTurn(true);
-			foreach (MazeItem *i, _turns) {
-				if(i->currentTurn())
-					item->setCurrentTurn(false);
 			}
 		}
 		_turns.append(item);

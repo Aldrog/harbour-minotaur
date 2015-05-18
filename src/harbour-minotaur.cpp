@@ -31,6 +31,7 @@
 #include "mazeengine.h"
 #include "mazeitemplayer.h"
 #include "mazeitemexit.h"
+#include "mazeitemminotaur.h"
 
 int main(int argc, char *argv[])
 {
@@ -46,6 +47,7 @@ int main(int argc, char *argv[])
 	QScopedPointer<QGuiApplication> app(SailfishApp::application(argc, argv));
 	qmlRegisterType<MazeEngine>("harbour.minotaur.maze", 1, 0, "MazeEngine");
 	qmlRegisterType<MazeItemPlayer>("harbour.minotaur.maze", 1, 0, "MazeItemPlayer");
+	qmlRegisterType<MazeItemMinotaur>("harbour.minotaur.maze", 1, 0, "MazeItemMinotaur");
 	QScopedPointer<QQuickView> view(SailfishApp::createView());
 	Tools* cpptools = new Tools();
 	view->rootContext()->setContextProperty("cpptools", cpptools);
