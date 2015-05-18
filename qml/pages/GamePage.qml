@@ -27,7 +27,7 @@ Page {
 
 	property int size: 9
 	property int wallWidth: 4
-	// We store known walls as a string consisting of lines looking like \x\y\l or \x\y\t. l and t mean left and top sides of the cell.
+	// We store known walls as a string consisting of lines like \x\y\l or \x\y\t. l and t mean left and top sides of the cell.
 	property string walls: ""
 
 	MazeEngine {
@@ -50,7 +50,7 @@ Page {
 		title: qsTr("Level 1")
 	}
 
-	//Parent rectangle for labyrinth cells
+	// Parent rectangle for labyrinth cells
 	Rectangle {
 		id: labyrinth
 		anchors {
@@ -81,7 +81,7 @@ Page {
 							property int lx: index - 1
 							width: labyrinth.width / size
 							height: labyrinth.height / size
-							color: (lx == ~~(size / 2) && ly == ~~(size / 2)) ? "magenta" : "transparent"
+							color: "transparent"
 
 							Rectangle {
 								id: topB
@@ -212,6 +212,14 @@ Page {
 						}
 					}
 				}]
+		}
+
+		Rectangle {
+			id: playerRect
+			anchors.centerIn: parent
+			width: labyrinth.width / size - 2*Theme.paddingSmall
+			height: labyrinth.height / size - 2*Theme.paddingSmall
+			color: "magenta"
 		}
 
 		MouseArea {

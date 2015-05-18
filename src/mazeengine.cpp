@@ -131,7 +131,9 @@ void MazeEngine::generateRandom(int size) {
 
 	// Now check for pass blockers and get rid of them
 	foreach (QPoint i, availableLocations) {
-		if(!canGo(i, "Up") && !canGo(i, "Down") && !canGo(i, "Left") && !canGo(i, "Right")) {
+		int passCount = (canGo(i, "Up") ? 1 : 0) + (canGo(i, "Down") ? 1 : 0) + (canGo(i, "Left") ? 1 : 0) + (canGo(i, "Right") ? 1 : 0);
+		// One-cell blocker
+		if(passCount == 0) {
 			p.s = i;
 			bool blockerRemoved = false;
 			while(!blockerRemoved) {
@@ -182,6 +184,85 @@ void MazeEngine::generateRandom(int size) {
 					}
 					break;
 				}
+			}
+			qDebug() << "One-cell blocker removed";
+		}
+		// Two-cells blocker
+		if(passCount == 1) {
+			// Find which cell is the only pass leading to
+			QPoint neighbour;
+			if(canGo(i, "Up"))
+				neighbour = i + QPoint(0,-1);
+			if(canGo(i, "Down"))
+				neighbour = i + QPoint(0,1);
+			if(canGo(i, "Left"))
+				neighbour = i + QPoint(-1,0);
+			if(canGo(i, "Right"))
+				neighbour = i + QPoint(1,0);
+			// Check if it also has only one pass. If so, we have a blocker
+			int nPassCount = (canGo(neighbour, "Up") ? 1 : 0) + (canGo(neighbour, "Down") ? 1 : 0) + (canGo(neighbour, "Left") ? 1 : 0) + (canGo(neighbour, "Right") ? 1 : 0);
+			if(nPassCount == 1) {
+				bool blockerRemoved = false;
+				while(!blockerRemoved) {
+					qDebug() << "trying to remove blocker";
+					switch(rand() % 2) {
+					case 0:
+						p.s = i;
+						break;
+					case 1:
+						p.s = neighbour;
+						break;
+					}
+					switch(rand() % 4) {
+					case 0:
+						p.e = p.s + QPoint(0,-1);
+						p.d = Up;
+						// If we are not lucky, we may get really a lot of iterations before we finally fix the blocker
+						// Maybe it would be better to somehow save direction in which we can go and rand()%3
+						if(!canGo(p.s, "Up") && availableLocations.contains(p.e)) {
+							_passes.append(p);
+							std::swap(p.s, p.e);
+							p.d = getOppositeDirection(p.d);
+							_passes.append(p);
+							blockerRemoved = true;
+						}
+						break;
+					case 1:
+						p.e = p.s + QPoint(0,1);
+						p.d = Down;
+						if(!canGo(p.s, "Down") && availableLocations.contains(p.e)) {
+							_passes.append(p);
+							std::swap(p.s, p.e);
+							p.d = getOppositeDirection(p.d);
+							_passes.append(p);
+							blockerRemoved = true;
+						}
+						break;
+					case 2:
+						p.e = p.s + QPoint(-1,0);
+						p.d = Left;
+						if(!canGo(p.s, "Left") && availableLocations.contains(p.e)) {
+							_passes.append(p);
+							std::swap(p.s, p.e);
+							p.d = getOppositeDirection(p.d);
+							_passes.append(p);
+							blockerRemoved = true;
+						}
+						break;
+					case 3:
+						p.e = p.s + QPoint(1,0);
+						p.d = Right;
+						if(!canGo(p.s, "Right") && availableLocations.contains(p.e)) {
+							_passes.append(p);
+							std::swap(p.s, p.e);
+							p.d = getOppositeDirection(p.d);
+							_passes.append(p);
+							blockerRemoved = true;
+						}
+						break;
+					}
+				}
+				qDebug() << "Two-cells blocker removed";
 			}
 		}
 	}
