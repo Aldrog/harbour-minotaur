@@ -44,10 +44,12 @@ Page {
 		currentTurn: true
 
 		onOutOfMaze: pageStack.replace(Qt.resolvedUrl("WinPage.qml"))
+		onWasKilled: pageStack.replace(Qt.resolvedUrl("LosePage.qml"))
 	}
 	MazeItemMinotaur {
 		id: minotaur
 		engine: engine
+		difficulty: MazeItemMinotaur.LowDifficulty
 	}
 
 	PageHeader {

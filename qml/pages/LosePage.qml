@@ -17,40 +17,38 @@
  * along with Minotaur.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MAZEITEMMINOTAUR_H
-#define MAZEITEMMINOTAUR_H
+import QtQuick 2.0
+import Sailfish.Silica 1.0
 
-#include "mazeitem.h"
+Page {
+	id: page
+	allowedOrientations: Orientation.All
 
-class MazeItemMinotaur : public MazeItem
-{
-	Q_OBJECT
-public:
-	explicit MazeItemMinotaur(QObject *parent = 0);
+	PageHeader {
+		id: header
+		title: qsTr("You died. What a pity!")
+	}
 
-	enum Difficulty {
-		LowDifficulty,
-		MediumDifficulty,
-		HighDifficulty
-	};
-	Q_ENUMS(Difficulty)
-	Q_PROPERTY(Difficulty difficulty READ difficulty WRITE setDifficulty NOTIFY difficultyChanged)
+	Label {
+		id: winningText
+		anchors {
+			top: header.bottom
+			left: parent.left
+			right: parent.right
+			margins: Theme.paddingLarge
+		}
+		text: qsTr("You were eaten by evil minotaur.\n\nSee you next game.")
+		wrapMode: Text.WordWrap
+	}
 
-	inline Difficulty difficulty() { return _dif; }
-	void setDifficulty(Difficulty newDifficulty);
-
-signals:
-	void difficultyChanged();
-
-public slots:
-	void turn();
-
-private:
-	void turnLowDifficulty();
-	void turnMediumDifficulty();
-	void turnHighDifficulty();
-
-	Difficulty _dif;
-};
-
-#endif // MAZEITEMMINOTAUR_H
+	Button {
+		id: endButton
+		anchors {
+			bottom: parent.bottom
+			horizontalCenter: parent.horizontalCenter
+			margins: Theme.paddingLarge
+		}
+		text: qsTr("Goodbye!")
+		onClicked: pageStack.pop()
+	}
+}

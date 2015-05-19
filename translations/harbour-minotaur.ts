@@ -16,6 +16,23 @@
     </message>
 </context>
 <context>
+    <name>LosePage</name>
+    <message>
+        <source>You died. What a pity!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>You were eaten by evil minotaur.
+
+See you next game.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Goodbye!</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>MenuPage</name>
     <message>
         <source>Play</source>

@@ -33,7 +33,8 @@ OTHER_FILES += qml/harbour-minotaur.qml \
     qml/pages/MenuPage.qml \
     qml/pages/GamePage.qml \
     qml/images/icon.png \
-    qml/pages/WinPage.qml
+    qml/pages/WinPage.qml \
+    qml/pages/LosePage.qml
 
 # to disable building translations every time, comment out the
 # following CONFIG line

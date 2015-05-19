@@ -32,12 +32,56 @@ MazeItemMinotaur::MazeItemMinotaur(QObject *parent) :
 	connect(this, SIGNAL(turnStarted()), this, SLOT(turn()));
 }
 
+void MazeItemMinotaur::setDifficulty(Difficulty newDifficulty) {
+	if(_dif != newDifficulty) {
+		_dif = newDifficulty;
+		emit difficultyChanged();
+	}
+}
+
 void MazeItemMinotaur::turn() {
 	qDebug() << "minotaur turn";
-	QtConcurrent::run(this, &MazeItemMinotaur::turnHighDifficulty);
+	switch (_dif) {
+	case LowDifficulty:
+		QtConcurrent::run(this, &MazeItemMinotaur::turnLowDifficulty);
+		break;
+	case MediumDifficulty:
+		QtConcurrent::run(this, &MazeItemMinotaur::turnMediumDifficulty);
+		break;
+	case HighDifficulty:
+		QtConcurrent::run(this, &MazeItemMinotaur::turnHighDifficulty);
+		break;
+	default:
+		qDebug() << "This shouldn't happen";
+		break;
+	}
+}
+
+void MazeItemMinotaur::turnLowDifficulty() {
+	switch (rand() % 4) {
+	case 0:
+		this->move("Up");
+		break;
+	case 1:
+		this->move("Down");
+		break;
+	case 2:
+		this->move("Left");
+		break;
+	case 3:
+		this->move("Right");
+		break;
+	}
+
+	//emit turnEnded();
+}
+
+void MazeItemMinotaur::turnMediumDifficulty() {
+	usleep(1000000);
+	emit turnEnded();
 }
 
 void MazeItemMinotaur::turnHighDifficulty() {
-	usleep(1000000);
+	usleep(10000000);
 	emit turnEnded();
 }
