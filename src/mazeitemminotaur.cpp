@@ -52,28 +52,28 @@ void MazeItemMinotaur::turn() {
 		QtConcurrent::run(this, &MazeItemMinotaur::turnHighDifficulty);
 		break;
 	default:
-		qDebug() << "This shouldn't happen";
+		qDebug() << "This should never happen";
 		break;
 	}
 }
 
 void MazeItemMinotaur::turnLowDifficulty() {
-	switch (rand() % 4) {
-	case 0:
-		this->move(Up);
-		break;
-	case 1:
-		this->move(Down);
-		break;
-	case 2:
-		this->move(Left);
-		break;
-	case 3:
-		this->move(Right);
-		break;
-	}
+	QList<direction> allowedList = QList<direction>();
+	direction d;
+	d = Up;
+	if(this->engine()->canGo(this->location(), d) && this->engine()->availableLocations.contains(this->engine()->move(this->location(), d)))
+		allowedList += d;
+	d = Down;
+	if(this->engine()->canGo(this->location(), d) && this->engine()->availableLocations.contains(this->engine()->move(this->location(), d)))
+		allowedList += d;
+	d = Left;
+	if(this->engine()->canGo(this->location(), d) && this->engine()->availableLocations.contains(this->engine()->move(this->location(), d)))
+		allowedList += d;
+	d = Right;
+	if(this->engine()->canGo(this->location(), d) && this->engine()->availableLocations.contains(this->engine()->move(this->location(), d)))
+		allowedList += d;
 
-	//emit turnEnded();
+	this->move(allowedList.at(rand() % allowedList.count()));
 }
 
 void MazeItemMinotaur::turnMediumDifficulty() {
