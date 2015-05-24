@@ -17,8 +17,9 @@
  * along with Minotaur.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import QtQuick 2.0
+import QtQuick 2.1
 import Sailfish.Silica 1.0
+import QtGraphicalEffects 1.0
 import harbour.minotaur.maze 1.0
 
 Page {
@@ -33,7 +34,7 @@ Page {
 	MazeEngine {
 		id: engine
 		Component.onCompleted: {
-			generateRandom(10)
+			generateRandom(100)
 			player.randLocation()
 			minotaur.randLocation()
 		}
@@ -229,69 +230,218 @@ Page {
 			color: "magenta"
 		}
 
+		Rectangle {
+			id: controlsContainer
+			anchors.fill: labyrinth
+//			z: -1
+			color: "transparent"
+
+			Image {
+				id: moveUpImg
+				visible: false
+				anchors {	top: parent.top
+							bottom: parent.verticalCenter
+							horizontalCenter: parent.horizontalCenter
+						}
+				width: height
+				source: "../images/move.svg"
+			}
+			ColorOverlay {
+				id: upEffect
+				property bool highlighted: false
+				anchors.fill: moveUpImg
+				source: moveUpImg
+				rotation: 0
+				opacity: highlighted ? 1.0 : 0.6
+				color: highlighted ? Theme.highlightColor : Theme.secondaryColor
+			}
+
+			Image {
+				id: moveDownImg
+				visible: false
+				anchors {	bottom: parent.bottom
+							top: parent.verticalCenter
+							horizontalCenter: parent.horizontalCenter
+						}
+				width: height
+				source: "../images/move.svg"
+			}
+			ColorOverlay {
+				id: downEffect
+				property bool highlighted: false
+				anchors.fill: moveDownImg
+				source: moveDownImg
+				rotation: 180
+				opacity: highlighted ? 1.0 : 0.6
+				color: highlighted ? Theme.highlightColor : Theme.secondaryColor
+			}
+
+			Image {
+				id: moveLeftImg
+				visible: false
+				anchors {	left: parent.left
+							right: parent.horizontalCenter
+							verticalCenter: parent.verticalCenter
+						}
+				height: width
+				source: "../images/move.svg"
+			}
+			ColorOverlay {
+				id: leftEffect
+				property bool highlighted: false
+				anchors.fill: moveLeftImg
+				source: moveLeftImg
+				rotation: -90
+				opacity: highlighted ? 1.0 : 0.6
+				color: highlighted ? Theme.highlightColor : Theme.secondaryColor
+			}
+
+			Image {
+				id: moveRightImg
+				visible: false
+				anchors {	left: parent.horizontalCenter
+							right: parent.right
+							verticalCenter: parent.verticalCenter
+						}
+				height: width
+				source: "../images/move.svg"
+			}
+			ColorOverlay {
+				id: rightEffect
+				property bool highlighted: false
+				anchors.fill: moveRightImg
+				source: moveRightImg
+				rotation: 90
+				opacity: highlighted ? 1.0 : 0.6
+				color: highlighted ? Theme.highlightColor : Theme.secondaryColor
+			}
+		}
+
 		MouseArea {
 			anchors.fill: parent
 			preventStealing: true
 			property int oldX
 			property int oldY
-			onPressed: {
-				oldX = mouseX
-				oldY = mouseY
+			property string direction: ""
+
+			onDirectionChanged: {
+				upEffect.highlighted = false
+				downEffect.highlighted = false
+				leftEffect.highlighted = false
+				rightEffect.highlighted = false
+
+				if(direction === "Up") upEffect.highlighted = true
+				else if(direction === "Down") downEffect.highlighted = true
+				else if(direction === "Left") leftEffect.highlighted = true
+				else if(direction === "Right") rightEffect.highlighted = true
 			}
-			onReleased: {
-				if(rootContainer.state == "default" && player.currentTurn) {
-					if(Math.abs(mouseY - oldY) > Math.abs(mouseX - oldX) + 20) {
-						// Vertical swipe
-						if(mouseY > oldY) {
-							// Top to bottom
-							if(player.move("Down")) {
-								rootContainer.state = "movingDown"
-							}
-							else {
-								if(walls.split("\n").indexOf(~~(size / 2) + "\\" + (~~(size / 2) + 1) + "\\t") < 0) {
-									walls += ~~(size / 2) + "\\" + (~~(size / 2) + 1) + "\\t\n"
-								}
-							}
-						}
-						else {
-							// Bottom to top
-							if(player.move("Up")) {
-								rootContainer.state = "movingUp"
-							}
-							else {
-								if(walls.split("\n").indexOf(~~(size / 2) + "\\" + ~~(size / 2) + "\\t") < 0) {
-									walls += ~~(size / 2) + "\\" + ~~(size / 2) + "\\t\n"
-								}
-							}
-						}
-					}
-					if(Math.abs(mouseX - oldX) > Math.abs(mouseY - oldY) + 20) {
-						// Horizontal swipe
-						if(mouseX > oldX) {
-							// Left to right
-							if(player.move("Right")) {
-								rootContainer.state = "movingRight"
-							}
-							else {
-								if(walls.split("\n").indexOf((~~(size / 2) + 1) + "\\" + ~~(size / 2) + "\\l") < 0) {
-									walls += (~~(size / 2) + 1) + "\\" + ~~(size / 2) + "\\l\n"
-								}
-							}
-						}
-						else {
-							// Right to left
-							if(player.move("Left")) {
-								rootContainer.state = "movingLeft"
-							}
-							else {
-								if(walls.split("\n").indexOf(~~(size / 2) + "\\" + ~~(size / 2) + "\\l") < 0) {
-									walls += ~~(size / 2) + "\\" + ~~(size / 2) + "\\l\n"
-								}
-							}
-						}
-					}
+
+			function checkPosition() {
+				var relativeX = mouseX - width/2
+				var relativeY = mouseY - height/2
+				if(relativeY <= -Math.abs(relativeX)) {
+					// Upper quarter
+					direction = "Up"
+				} else if(relativeX >= Math.abs(relativeY)) {
+					// Right quarter
+					direction = "Right"
+				} else if(relativeY >= Math.abs(relativeX)) {
+					// Bottom quarter
+					direction = "Down"
+				} else {
+					// Left quarter
+					direction = "Left"
 				}
 			}
+
+			onMouseXChanged: checkPosition()
+			onMouseYChanged: checkPosition()
+			onReleased: {
+				if(direction) {
+					if(player.move(direction))
+						rootContainer.state = "moving" + direction
+					else {
+						var pos = ~~(size / 2)
+
+						if(direction === "Up") {
+							if(walls.split("\n").indexOf(pos + "\\" + pos + "\\t") < 0) {
+								walls += pos + "\\" + pos + "\\t\n"
+							}
+						} else if(direction === "Down") {
+							if(walls.split("\n").indexOf(pos + "\\" + (pos + 1) + "\\t") < 0) {
+								walls += pos + "\\" + (pos + 1) + "\\t\n"
+							}
+						} else if(direction === "Left") {
+							if(walls.split("\n").indexOf(pos + "\\" + pos + "\\l") < 0) {
+								walls += pos + "\\" + pos + "\\l\n"
+							}
+						} else if(direction === "Right")
+							if(walls.split("\n").indexOf((pos + 1) + "\\" + pos + "\\l") < 0) {
+								walls += (pos + 1) + "\\" + pos + "\\l\n"
+							}
+					}
+					direction = ""
+				}
+			}
+
+//			onPressed: {
+//				oldX = mouseX
+//				oldY = mouseY
+//			}
+//			onReleased: {
+//				if(rootContainer.state == "default" && player.currentTurn) {
+//					if(Math.abs(mouseY - oldY) > Math.abs(mouseX - oldX) + 20) {
+//						// Vertical swipe
+//						if(mouseY > oldY) {
+//							// Top to bottom
+//							if(player.move("Down")) {
+//								rootContainer.state = "movingDown"
+//							}
+//							else {
+//								if(walls.split("\n").indexOf(~~(size / 2) + "\\" + (~~(size / 2) + 1) + "\\t") < 0) {
+//									walls += ~~(size / 2) + "\\" + (~~(size / 2) + 1) + "\\t\n"
+//								}
+//							}
+//						}
+//						else {
+//							// Bottom to top
+//							if(player.move("Up")) {
+//								rootContainer.state = "movingUp"
+//							}
+//							else {
+//								if(walls.split("\n").indexOf(~~(size / 2) + "\\" + ~~(size / 2) + "\\t") < 0) {
+//									walls += ~~(size / 2) + "\\" + ~~(size / 2) + "\\t\n"
+//								}
+//							}
+//						}
+//					}
+//					if(Math.abs(mouseX - oldX) > Math.abs(mouseY - oldY) + 20) {
+//						// Horizontal swipe
+//						if(mouseX > oldX) {
+//							// Left to right
+//							if(player.move("Right")) {
+//								rootContainer.state = "movingRight"
+//							}
+//							else {
+//								if(walls.split("\n").indexOf((~~(size / 2) + 1) + "\\" + ~~(size / 2) + "\\l") < 0) {
+//									walls += (~~(size / 2) + 1) + "\\" + ~~(size / 2) + "\\l\n"
+//								}
+//							}
+//						}
+//						else {
+//							// Right to left
+//							if(player.move("Left")) {
+//								rootContainer.state = "movingLeft"
+//							}
+//							else {
+//								if(walls.split("\n").indexOf(~~(size / 2) + "\\" + ~~(size / 2) + "\\l") < 0) {
+//									walls += ~~(size / 2) + "\\" + ~~(size / 2) + "\\l\n"
+//								}
+//							}
+//						}
+//					}
+//				}
+//			}
 			onDoubleClicked: console.log(walls)
 		}
 	}
