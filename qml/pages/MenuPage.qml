@@ -23,7 +23,7 @@ import Sailfish.Silica 1.0
 
 Page {
 	id: page
-	allowedOrientations: Orientation.All
+	allowedOrientations: Orientation.Portrait | Orientation.PortraitInverted
 
 	Column {
 		anchors.centerIn: parent

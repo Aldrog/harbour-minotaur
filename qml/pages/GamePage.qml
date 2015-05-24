@@ -24,7 +24,7 @@ import harbour.minotaur.maze 1.0
 
 Page {
 	id: page
-	allowedOrientations: Orientation.All
+	allowedOrientations: Orientation.Portrait | Orientation.PortraitInverted
 
 	property int size: 9
 	property int wallWidth: 4
@@ -320,8 +320,6 @@ Page {
 		MouseArea {
 			anchors.fill: parent
 			preventStealing: true
-			property int oldX
-			property int oldY
 			property string direction: ""
 
 			onDirectionChanged: {
