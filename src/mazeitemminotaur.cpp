@@ -60,16 +60,16 @@ void MazeItemMinotaur::turn() {
 void MazeItemMinotaur::turnLowDifficulty() {
 	switch (rand() % 4) {
 	case 0:
-		this->move("Up");
+		this->move(Up);
 		break;
 	case 1:
-		this->move("Down");
+		this->move(Down);
 		break;
 	case 2:
-		this->move("Left");
+		this->move(Left);
 		break;
 	case 3:
-		this->move("Right");
+		this->move(Right);
 		break;
 	}
 

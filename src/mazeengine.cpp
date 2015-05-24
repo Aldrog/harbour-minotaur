@@ -21,11 +21,6 @@
 #include "mazeitemexit.h"
 #include <QDebug>
 
-direction getOppositeDirection(direction d) {
-	static direction opposite[] = { Down, Up, Right, Left };
-	return opposite[d];
-}
-
 bool operator ==(pass a, pass b) {
 	return ( a.s == b.s && a.e == b.e && a.d == b.d );
 }
@@ -96,9 +91,10 @@ void MazeEngine::generateRandom(int size) {
 
 	// Generate random walls
 	foreach (QPoint i, availableLocations) {
+		// In each square 2x2 we create one wall
 		if (availableLocations.contains(i + QPoint(0,1)) &&
-				availableLocations.contains(i + QPoint(1,0)) &&
-				availableLocations.contains(i + QPoint(1,1))) {
+			availableLocations.contains(i + QPoint(1,0)) &&
+			availableLocations.contains(i + QPoint(1,1))) {
 
 			switch(rand() % 4) {
 			case 0:
@@ -130,171 +126,159 @@ void MazeEngine::generateRandom(int size) {
 	}
 
 	// Now check for pass blockers and get rid of them
+	QList<pass> *blocker;
 	foreach (QPoint i, availableLocations) {
-		int passCount = (canGo(i, "Up") ? 1 : 0) + (canGo(i, "Down") ? 1 : 0) + (canGo(i, "Left") ? 1 : 0) + (canGo(i, "Right") ? 1 : 0);
-		// One-cell blocker
-		if(passCount == 0) {
-			p.s = i;
-			bool blockerRemoved = false;
-			while(!blockerRemoved) {
-				qDebug() << "trying to remove blocker";
-				switch(rand() % 4) {
-				case 0:
-					p.e = i + QPoint(0,-1);
-					p.d = Up;
-					if(availableLocations.contains(p.e)) {
-						_passes.append(p);
-						std::swap(p.s, p.e);
-						p.d = getOppositeDirection(p.d);
-						_passes.append(p);
-						blockerRemoved = true;
-					}
-					break;
-				case 1:
-					p.e = i + QPoint(0,1);
-					p.d = Down;
-					if(availableLocations.contains(p.e)) {
-						_passes.append(p);
-						std::swap(p.s, p.e);
-						p.d = getOppositeDirection(p.d);
-						_passes.append(p);
-						blockerRemoved = true;
-					}
-					break;
-				case 2:
-					p.e = i + QPoint(-1,0);
-					p.d = Left;
-					if(availableLocations.contains(p.e)) {
-						_passes.append(p);
-						std::swap(p.s, p.e);
-						p.d = getOppositeDirection(p.d);
-						_passes.append(p);
-						blockerRemoved = true;
-					}
-					break;
-				case 3:
-					p.e = i + QPoint(1,0);
-					p.d = Right;
-					if(availableLocations.contains(p.e)) {
-						_passes.append(p);
-						std::swap(p.s, p.e);
-						p.d = getOppositeDirection(p.d);
-						_passes.append(p);
-						blockerRemoved = true;
-					}
-					break;
-				}
-			}
-			qDebug() << "One-cell blocker removed";
+		blocker = new QList<pass>();
+		// We need a direction for which a wall exists on the right side
+		if(!canGo(i, Up))
+			findBlockers(blocker, i, Left, i, Left);
+		else if(!canGo(i, Left))
+			findBlockers(blocker, i, Down, i, Down);
+		else if(!canGo(i, Down))
+			findBlockers(blocker, i, Right, i, Right);
+		else if(!canGo(i, Right))
+			findBlockers(blocker, i, Up, i, Up);
+		// Don't check for blockers if there're no walls around
+
+		if(blocker->count() > 0) {
+			qDebug() << "found a closed loop consisting of" << blocker->count() << "walls";
+			p = blocker->at(rand() % blocker->count());
+			_passes.append(p);
+			std::swap(p.s, p.e);
+			p.d = getOppositeDirection(p.d);
+			_passes.append(p);
 		}
-		// Two-cells blocker
-		if(passCount == 1) {
-			// Find which cell is the only pass leading to
-			QPoint neighbour;
-			if(canGo(i, "Up"))
-				neighbour = i + QPoint(0,-1);
-			if(canGo(i, "Down"))
-				neighbour = i + QPoint(0,1);
-			if(canGo(i, "Left"))
-				neighbour = i + QPoint(-1,0);
-			if(canGo(i, "Right"))
-				neighbour = i + QPoint(1,0);
-			// Check if it also has only one pass. If so, we have a blocker
-			int nPassCount = (canGo(neighbour, "Up") ? 1 : 0) + (canGo(neighbour, "Down") ? 1 : 0) + (canGo(neighbour, "Left") ? 1 : 0) + (canGo(neighbour, "Right") ? 1 : 0);
-			if(nPassCount == 1) {
-				bool blockerRemoved = false;
-				while(!blockerRemoved) {
-					qDebug() << "trying to remove blocker";
-					switch(rand() % 2) {
-					case 0:
-						p.s = i;
-						break;
-					case 1:
-						p.s = neighbour;
-						break;
-					}
-					switch(rand() % 4) {
-					case 0:
-						p.e = p.s + QPoint(0,-1);
-						p.d = Up;
-						// If we are not lucky, we may get really a lot of iterations before we finally fix the blocker
-						// Maybe it would be better to somehow save direction in which we can go and rand()%3
-						if(!canGo(p.s, "Up") && availableLocations.contains(p.e)) {
-							_passes.append(p);
-							std::swap(p.s, p.e);
-							p.d = getOppositeDirection(p.d);
-							_passes.append(p);
-							blockerRemoved = true;
-						}
-						break;
-					case 1:
-						p.e = p.s + QPoint(0,1);
-						p.d = Down;
-						if(!canGo(p.s, "Down") && availableLocations.contains(p.e)) {
-							_passes.append(p);
-							std::swap(p.s, p.e);
-							p.d = getOppositeDirection(p.d);
-							_passes.append(p);
-							blockerRemoved = true;
-						}
-						break;
-					case 2:
-						p.e = p.s + QPoint(-1,0);
-						p.d = Left;
-						if(!canGo(p.s, "Left") && availableLocations.contains(p.e)) {
-							_passes.append(p);
-							std::swap(p.s, p.e);
-							p.d = getOppositeDirection(p.d);
-							_passes.append(p);
-							blockerRemoved = true;
-						}
-						break;
-					case 3:
-						p.e = p.s + QPoint(1,0);
-						p.d = Right;
-						if(!canGo(p.s, "Right") && availableLocations.contains(p.e)) {
-							_passes.append(p);
-							std::swap(p.s, p.e);
-							p.d = getOppositeDirection(p.d);
-							_passes.append(p);
-							blockerRemoved = true;
-						}
-						break;
-					}
-				}
-				qDebug() << "Two-cells blocker removed";
-			}
-		}
-		// I've never seen unreachable territory more then two cells sized
+
+		delete blocker;
 	}
 }
 
-bool MazeEngine::canGo(QPoint location, QString dir) {
-	if(dir.toLower() == "up") {
-		foreach(pass i, _passes) {
-			if(i.s == location && i.d == Up)
-				return true;
+void MazeEngine::findBlockers(QList<pass> *blockingWalls, QPoint initialLocation, direction initialDirection, QPoint location, direction dir, bool debug, bool start) {
+	if(debug) {
+		if(start)
+			qDebug() << "started search in" << initialLocation.x() << initialLocation.y() << initialDirection;
+		else
+			qDebug() << location.x() << location.y() << dir;
+	}
+	if(location == initialLocation && dir == initialDirection && !start) {
+		if(debug)
+			qDebug() << "found a loop";
+		return;
+	}
+
+	// Check for a wall to the right of current direction
+	direction checkDir;
+	switch (dir) {
+	case Up:
+		checkDir = Right;
+		break;
+	case Right:
+		checkDir = Down;
+		break;
+	case Down:
+		checkDir = Left;
+		break;
+	case Left:
+		checkDir = Up;
+		break;
+	case Error:
+		qDebug() << "wtf?";
+		break;
+	}
+	if(canGo(location, checkDir)) {
+		if(!availableLocations.contains(move(location, checkDir))) {
+			// If there's an exit, stop checking and clear all found walls
+			blockingWalls->clear();
+			return;
+		}
+		// If there's a pass, go into it
+		findBlockers(blockingWalls, initialLocation, initialDirection, move(location, checkDir), checkDir, debug, false);
+		return;
+	}
+	// If there's a wall we either add it to the list or remove it from there depending on did we see this wall previously
+	if(availableLocations.contains(location + directionToPoint(checkDir))) {
+		pass p;
+		p.d = checkDir;
+		p.s = location;
+		p.e = location + directionToPoint(p.d);
+		if(debug)
+			qDebug() << "wall" << p.s.x() << p.s.y() << p.d;
+		if(blockingWalls->contains(p)) {
+			blockingWalls->removeAll(p);
+		}
+		else {\
+			blockingWalls->append(p);
+		}
+		std::swap(p.s, p.e);
+		p.d = getOppositeDirection(p.d);
+		if(blockingWalls->contains(p)) {
+			blockingWalls->removeAll(p);
+		}
+		else {
+			blockingWalls->append(p);
 		}
 	}
-	if(dir.toLower() == "down") {
-		foreach(pass i, _passes) {
-			if(i.s == location && i.d == Down)
-				return true;
+
+	// If there's a wall to the right and we can go further, do it
+	if(canGo(location, dir)) {
+		if(!availableLocations.contains(location + directionToPoint(dir))) {
+			// If there's an exit, stop checking and clear all found walls
+			blockingWalls->clear();
+			return;
 		}
+		findBlockers(blockingWalls, initialLocation, initialDirection, move(location, dir), dir, debug, false);
+		return;
+	} else {
+		// If there's a wall in front, turn left on the place
+		direction newDir;
+		switch (dir) {
+		case Up:
+			newDir = Left;
+			break;
+		case Left:
+			newDir = Down;
+			break;
+		case Down:
+			newDir = Right;
+			break;
+		case Right:
+			newDir = Up;
+			break;
+		case Error:
+			qDebug() << "wtf?";
+			break;
+		}
+
+		if(!availableLocations.contains(location + directionToPoint(newDir))) {
+			// If there's an exit, stop checking and clear all found walls
+			blockingWalls->clear();
+			return;
+		}
+		findBlockers(blockingWalls, initialLocation, initialDirection, location, newDir, debug, false);
+		return;
 	}
-	if(dir.toLower() == "left") {
-		foreach(pass i, _passes) {
-			if(i.s == location && i.d == Left)
-				return true;
-		}
-	}
-	if(dir.toLower() == "right") {
-		foreach(pass i, _passes) {
-			if(i.s == location && i.d == Right)
-				return true;
-		}
+}
+
+bool MazeEngine::canGo(QPoint location, direction dir) {
+	foreach(pass i, _passes) {
+		if(i.s == location && i.d == dir)
+			return true;
 	}
 	return false;
+}
+
+bool MazeEngine::canGo(QPoint location, QString dir) {
+	if(directionFromString(dir) != Error)
+		return canGo(location, directionFromString(dir));
+	else return false;
+}
+
+// Should only be called after check with canGo()
+QPoint MazeEngine::move(QPoint location, direction dir) {
+	foreach(pass i, _passes) {
+		if(i.s == location && i.d == dir)
+			return i.e;
+	}
 }
 
 void MazeEngine::registerItem(MazeItem *item) {

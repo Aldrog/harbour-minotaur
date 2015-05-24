@@ -55,21 +55,10 @@ void MazeItem::setCurrentTurn(bool currentTurn) {
 	}
 }
 
-bool MazeItem::move(QString direction) {
+bool MazeItem::move(direction dir) {
 	if(_engine) {
-		if(currentTurn() && _engine->canGo(_location, direction)) {
-			if(direction.toLower() == "up") {
-				setLocation(_location + QPoint(0, -1));
-			}
-			if(direction.toLower() == "down") {
-				setLocation(_location + QPoint(0, 1));
-			}
-			if(direction.toLower() == "left") {
-				setLocation(_location + QPoint(-1, 0));
-			}
-			if(direction.toLower() == "right") {
-				setLocation(_location + QPoint(1, 0));
-			}
+		if(currentTurn() && _engine->canGo(_location, dir)) {
+			setLocation(_engine->move(_location, dir));
 			emit turnEnded();
 			return true;
 		}
@@ -79,7 +68,7 @@ bool MazeItem::move(QString direction) {
 }
 
 void MazeItem::randLocation() {
-	qDebug() << "choosing random location from" << _engine->availableLocations.count() << "variants";
+	qDebug() << "choosing random location out of" << _engine->availableLocations.count() << "variants";
 	setLocation(_engine->availableLocations.at(rand() % _engine->availableLocations.count()));
 }
 

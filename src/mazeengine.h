@@ -23,11 +23,9 @@
 #include <QObject>
 #include <QPoint>
 #include "mazeitem.h"
+#include "directionenum.h"
 
 class MazeItem;
-
-enum direction { Up, Down, Left, Right };
-direction getOppositeDirection(direction d);
 
 struct pass {
 	QPoint s;
@@ -43,8 +41,10 @@ public:
 	explicit MazeEngine(QObject *parent = 0);
 	~MazeEngine();
 	Q_INVOKABLE void generateRandom(int size);
+	bool canGo(QPoint location, direction dir);
 	Q_INVOKABLE bool canGo(QPoint location, QString dir);
 	Q_INVOKABLE inline bool canGo(int x, int y, QString dir) { return canGo(QPoint(x, y), dir); }
+	QPoint move(QPoint location, direction dir);
 	void registerItem(MazeItem *item);
 	void removeItem(MazeItem *item);
 
@@ -61,6 +61,8 @@ private:
 	QList<pass> _passes;
 	QList<MazeItem*> _items;
 	QList<MazeItem*> _turns;
+
+	void findBlockers(QList<pass> *blockingWalls, QPoint initialLocation, direction initialDirection, QPoint location, direction dir, bool debug = false, bool start = true);
 };
 
 #endif // MAZEENGINE_H

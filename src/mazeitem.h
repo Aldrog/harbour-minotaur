@@ -23,6 +23,7 @@
 #include <QObject>
 #include <QPoint>
 #include "mazeengine.h"
+#include "directionenum.h"
 
 class MazeEngine;
 
@@ -36,7 +37,8 @@ public:
 	Q_PROPERTY(QPoint location READ location WRITE setLocation NOTIFY locationChanged)
 	Q_PROPERTY(bool currentTurn READ currentTurn WRITE setCurrentTurn NOTIFY currentTurnChanged)
 
-	Q_INVOKABLE bool move(QString direction);
+	bool move(direction dir);
+	Q_INVOKABLE inline bool move(QString dir) { return move(directionFromString(dir)); }
 	Q_INVOKABLE void randLocation();
 	inline MazeEngine *engine()	{ return _engine; }
 	void setEngine(MazeEngine *engine);
