@@ -34,7 +34,7 @@ Page {
 	MazeEngine {
 		id: engine
 		Component.onCompleted: {
-			generateRandom(100)
+			generateRandom(10)
 			player.randLocation()
 			minotaur.randLocation()
 		}
@@ -357,7 +357,7 @@ Page {
 			onMouseXChanged: checkPosition()
 			onMouseYChanged: checkPosition()
 			onReleased: {
-				if(direction) {
+				if(direction && rootContainer.state == "default" && player.currentTurn) {
 					if(player.move(direction))
 						rootContainer.state = "moving" + direction
 					else {
@@ -384,64 +384,6 @@ Page {
 				}
 			}
 
-//			onPressed: {
-//				oldX = mouseX
-//				oldY = mouseY
-//			}
-//			onReleased: {
-//				if(rootContainer.state == "default" && player.currentTurn) {
-//					if(Math.abs(mouseY - oldY) > Math.abs(mouseX - oldX) + 20) {
-//						// Vertical swipe
-//						if(mouseY > oldY) {
-//							// Top to bottom
-//							if(player.move("Down")) {
-//								rootContainer.state = "movingDown"
-//							}
-//							else {
-//								if(walls.split("\n").indexOf(~~(size / 2) + "\\" + (~~(size / 2) + 1) + "\\t") < 0) {
-//									walls += ~~(size / 2) + "\\" + (~~(size / 2) + 1) + "\\t\n"
-//								}
-//							}
-//						}
-//						else {
-//							// Bottom to top
-//							if(player.move("Up")) {
-//								rootContainer.state = "movingUp"
-//							}
-//							else {
-//								if(walls.split("\n").indexOf(~~(size / 2) + "\\" + ~~(size / 2) + "\\t") < 0) {
-//									walls += ~~(size / 2) + "\\" + ~~(size / 2) + "\\t\n"
-//								}
-//							}
-//						}
-//					}
-//					if(Math.abs(mouseX - oldX) > Math.abs(mouseY - oldY) + 20) {
-//						// Horizontal swipe
-//						if(mouseX > oldX) {
-//							// Left to right
-//							if(player.move("Right")) {
-//								rootContainer.state = "movingRight"
-//							}
-//							else {
-//								if(walls.split("\n").indexOf((~~(size / 2) + 1) + "\\" + ~~(size / 2) + "\\l") < 0) {
-//									walls += (~~(size / 2) + 1) + "\\" + ~~(size / 2) + "\\l\n"
-//								}
-//							}
-//						}
-//						else {
-//							// Right to left
-//							if(player.move("Left")) {
-//								rootContainer.state = "movingLeft"
-//							}
-//							else {
-//								if(walls.split("\n").indexOf(~~(size / 2) + "\\" + ~~(size / 2) + "\\l") < 0) {
-//									walls += ~~(size / 2) + "\\" + ~~(size / 2) + "\\l\n"
-//								}
-//							}
-//						}
-//					}
-//				}
-//			}
 			onDoubleClicked: console.log(walls)
 		}
 	}
