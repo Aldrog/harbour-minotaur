@@ -43,6 +43,8 @@ void MazeItem::setLocation(QPoint location) {
 	if(location != _location) {
 		_location = location;
 		emit locationChanged(this);
+		if(engine() && !engine()->availableLocations.contains(location))
+			emit outOfMaze();
 	}
 }
 

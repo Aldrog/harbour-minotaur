@@ -18,7 +18,6 @@
  */
 
 #include "mazeengine.h"
-#include "mazeitemexit.h"
 #include <QDebug>
 
 bool operator ==(pass a, pass b) {
@@ -47,44 +46,24 @@ void MazeEngine::generateRandom(int size) {
 				p.d = Up;
 				p.e = QPoint(i, j - 1);
 				_passes.append(p);
-				if(j == 0) {
-					MazeItemExit *ex = new MazeItemExit();
-					ex->setEngine(this);
-					ex->setLocation(p.e);
-				}
 			}
 
 			if(j < size - 1 || size + i == exitNumber) {
 				p.d = Down;
 				p.e = QPoint(i, j + 1);
 				_passes.append(p);
-				if(j == size - 1) {
-					MazeItemExit *ex = new MazeItemExit();
-					ex->setEngine(this);
-					ex->setLocation(p.e);
-				}
 			}
 
 			if(i > 0 || 2*size + j == exitNumber) {
 				p.d = Left;
 				p.e = QPoint(i - 1, j);
 				_passes.append(p);
-				if(i == 0) {
-					MazeItemExit *ex = new MazeItemExit();
-					ex->setEngine(this);
-					ex->setLocation(p.e);
-				}
 			}
 
 			if(i < size - 1 || 3*size + j == exitNumber) {
 				p.d = Right;
 				p.e = QPoint(i + 1, j);
 				_passes.append(p);
-				if(i == size - 1) {
-					MazeItemExit *ex = new MazeItemExit();
-					ex->setEngine(this);
-					ex->setLocation(p.e);
-				}
 			}
 		}
 	}
