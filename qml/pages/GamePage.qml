@@ -46,6 +46,8 @@ Page {
 
 		onOutOfMaze: pageStack.replace(Qt.resolvedUrl("WinPage.qml"))
 		onWasKilled: pageStack.replace(Qt.resolvedUrl("LosePage.qml"))
+		onDangerChanged: console.log("WARNING", dangerLevel)
+		// TODO: implement vibration and other effects on turnStarted according to dangerLevel
 	}
 	MazeItemMinotaur {
 		id: minotaur
@@ -235,6 +237,8 @@ Page {
 			anchors.fill: labyrinth
 //			z: -1
 			color: "transparent"
+			property bool enabled: rootContainer.state == "default" && player.currentTurn
+			property string direction: ""
 
 			Image {
 				id: moveUpImg
@@ -248,12 +252,12 @@ Page {
 			}
 			ColorOverlay {
 				id: upEffect
-				property bool highlighted: false
+				property bool highlighted: controlsContainer.direction == "Up"
 				anchors.fill: moveUpImg
 				source: moveUpImg
 				rotation: 0
-				opacity: highlighted ? 1.0 : 0.6
-				color: highlighted ? Theme.highlightColor : Theme.secondaryColor
+				opacity: controlsContainer.enabled ? (highlighted ? 1.0 : 0.6) : 0.5
+				color: controlsContainer.enabled ? (highlighted ? Theme.highlightColor : Theme.primaryColor) : Theme.secondaryColor
 			}
 
 			Image {
@@ -268,12 +272,12 @@ Page {
 			}
 			ColorOverlay {
 				id: downEffect
-				property bool highlighted: false
+				property bool highlighted: controlsContainer.direction == "Down"
 				anchors.fill: moveDownImg
 				source: moveDownImg
 				rotation: 180
-				opacity: highlighted ? 1.0 : 0.6
-				color: highlighted ? Theme.highlightColor : Theme.secondaryColor
+				opacity: controlsContainer.enabled ? (highlighted ? 1.0 : 0.6) : 0.5
+				color: controlsContainer.enabled ? (highlighted ? Theme.highlightColor : Theme.primaryColor) : Theme.secondaryColor
 			}
 
 			Image {
@@ -288,12 +292,12 @@ Page {
 			}
 			ColorOverlay {
 				id: leftEffect
-				property bool highlighted: false
+				property bool highlighted: controlsContainer.direction == "Left"
 				anchors.fill: moveLeftImg
 				source: moveLeftImg
 				rotation: -90
-				opacity: highlighted ? 1.0 : 0.6
-				color: highlighted ? Theme.highlightColor : Theme.secondaryColor
+				opacity: controlsContainer.enabled ? (highlighted ? 1.0 : 0.6) : 0.5
+				color: controlsContainer.enabled ? (highlighted ? Theme.highlightColor : Theme.primaryColor) : Theme.secondaryColor
 			}
 
 			Image {
@@ -308,77 +312,66 @@ Page {
 			}
 			ColorOverlay {
 				id: rightEffect
-				property bool highlighted: false
+				property bool highlighted: controlsContainer.direction == "Right"
 				anchors.fill: moveRightImg
 				source: moveRightImg
 				rotation: 90
-				opacity: highlighted ? 1.0 : 0.6
-				color: highlighted ? Theme.highlightColor : Theme.secondaryColor
+				opacity: controlsContainer.enabled ? (highlighted ? 1.0 : 0.6) : 0.5
+				color: controlsContainer.enabled ? (highlighted ? Theme.highlightColor : Theme.primaryColor) : Theme.secondaryColor
 			}
 		}
 
 		MouseArea {
 			anchors.fill: parent
 			preventStealing: true
-			property string direction: ""
-
-			onDirectionChanged: {
-				upEffect.highlighted = false
-				downEffect.highlighted = false
-				leftEffect.highlighted = false
-				rightEffect.highlighted = false
-
-				if(direction === "Up") upEffect.highlighted = true
-				else if(direction === "Down") downEffect.highlighted = true
-				else if(direction === "Left") leftEffect.highlighted = true
-				else if(direction === "Right") rightEffect.highlighted = true
-			}
 
 			function checkPosition() {
-				var relativeX = mouseX - width/2
-				var relativeY = mouseY - height/2
-				if(relativeY <= -Math.abs(relativeX)) {
-					// Upper quarter
-					direction = "Up"
-				} else if(relativeX >= Math.abs(relativeY)) {
-					// Right quarter
-					direction = "Right"
-				} else if(relativeY >= Math.abs(relativeX)) {
-					// Bottom quarter
-					direction = "Down"
-				} else {
-					// Left quarter
-					direction = "Left"
+				if(controlsContainer.enabled) {
+					var relativeX = mouseX - width/2
+					var relativeY = mouseY - height/2
+					if(relativeY <= -Math.abs(relativeX)) {
+						// Upper quarter
+						controlsContainer.direction = "Up"
+					} else if(relativeX >= Math.abs(relativeY)) {
+						// Right quarter
+						controlsContainer.direction = "Right"
+					} else if(relativeY >= Math.abs(relativeX)) {
+						// Bottom quarter
+						controlsContainer.direction = "Down"
+					} else {
+						// Left quarter
+						controlsContainer.direction = "Left"
+					}
 				}
 			}
 
 			onMouseXChanged: checkPosition()
 			onMouseYChanged: checkPosition()
 			onReleased: {
-				if(direction && rootContainer.state == "default" && player.currentTurn) {
-					if(player.move(direction))
-						rootContainer.state = "moving" + direction
+				if(controlsContainer.direction && rootContainer.state == "default" && player.currentTurn) {
+					if(player.move(controlsContainer.direction))
+						rootContainer.state = "moving" + controlsContainer.direction
 					else {
 						var pos = ~~(size / 2)
 
-						if(direction === "Up") {
+						if(controlsContainer.direction === "Up") {
 							if(walls.split("\n").indexOf(pos + "\\" + pos + "\\t") < 0) {
 								walls += pos + "\\" + pos + "\\t\n"
 							}
-						} else if(direction === "Down") {
+						} else if(controlsContainer.direction === "Down") {
 							if(walls.split("\n").indexOf(pos + "\\" + (pos + 1) + "\\t") < 0) {
 								walls += pos + "\\" + (pos + 1) + "\\t\n"
 							}
-						} else if(direction === "Left") {
+						} else if(controlsContainer.direction === "Left") {
 							if(walls.split("\n").indexOf(pos + "\\" + pos + "\\l") < 0) {
 								walls += pos + "\\" + pos + "\\l\n"
 							}
-						} else if(direction === "Right")
+						} else if(controlsContainer.direction === "Right")
 							if(walls.split("\n").indexOf((pos + 1) + "\\" + pos + "\\l") < 0) {
 								walls += (pos + 1) + "\\" + pos + "\\l\n"
 							}
 					}
-					direction = ""
+					controlsContainer.direction = ""
 				}
 			}
 

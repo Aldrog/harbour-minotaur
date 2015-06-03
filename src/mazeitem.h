@@ -22,6 +22,8 @@
 
 #include <QObject>
 #include <QPoint>
+#include <QList>
+#include <QHash>
 #include "mazeengine.h"
 #include "directionenum.h"
 
@@ -30,32 +32,52 @@ class MazeEngine;
 class MazeItem : public QObject
 {
 	Q_OBJECT
+protected:
+	MazeEngine *_engine;
+	QPoint _location;
+	bool _turn;
+	int _danger;
+
 public:
 	explicit MazeItem(QObject *parent = 0);
 	~MazeItem();
-	Q_PROPERTY(MazeEngine *engine READ engine WRITE setEngine NOTIFY engineChanged)
-	Q_PROPERTY(QPoint location READ location WRITE setLocation NOTIFY locationChanged)
-	Q_PROPERTY(bool currentTurn READ currentTurn WRITE setCurrentTurn NOTIFY currentTurnChanged)
 
-	bool move(direction dir);
-	Q_INVOKABLE inline bool move(QString dir) { return move(directionFromString(dir)); }
-	Q_INVOKABLE void randLocation();
-	inline MazeEngine *engine()	{ return _engine; }
-	void setEngine(MazeEngine *engine);
-	inline QPoint location()	{ return _location; }
-	void setLocation(QPoint location);
-	inline bool currentTurn()	{ return _turn; }
-	void setCurrentTurn(bool currentTurn);
+	// Basic item properties
 	bool killable;
 	bool killer;
 	bool pickable;
 	bool picker;
 	bool movable;
 
+	Q_PROPERTY(MazeEngine *engine READ engine WRITE setEngine NOTIFY engineChanged)
+	Q_PROPERTY(QPoint location READ location WRITE setLocation NOTIFY locationChanged)
+	// Used by movable items. One and only one movable item must have currentTurn set to true
+	Q_PROPERTY(bool currentTurn READ currentTurn WRITE setCurrentTurn NOTIFY currentTurnChanged)
+	// Used by killable items
+	Q_PROPERTY(int dangerLevel READ dangerLevel NOTIFY dangerChanged)
+
+	inline MazeEngine *engine()	{ return _engine; }
+	void setEngine(MazeEngine *engine);
+	inline QPoint location()	{ return _location; }
+	void setLocation(QPoint location);
+	inline bool currentTurn()	{ return _turn; }
+	void setCurrentTurn(bool currentTurn);
+	inline int dangerLevel()	{ return _danger; }
+	void setDangerLevel(int dangerLevel);
+
+	// Used by killers
+	QList<MazeItem*> targets;
+	QHash<MazeItem*, QList<QPoint> > paths;
+
+	bool move(direction dir);
+	Q_INVOKABLE inline bool move(QString dir) { return move(directionFromString(dir)); }
+	Q_INVOKABLE void randLocation();
+
 signals:
 	void engineChanged();
 	void locationChanged(MazeItem *item);
 	void currentTurnChanged();
+	void dangerChanged();
 	void wasKilled();
 	void wasPicked();
 	void outOfMaze();
@@ -64,11 +86,10 @@ signals:
 
 public slots:
 	virtual void intersected(MazeItem *item);
+	void findPaths();
 
 private:
-	MazeEngine *_engine;
-	QPoint _location;
-	bool _turn;
+	bool searchPath(QList<QPoint> *path, QPoint target);
 };
 
 #endif // MAZEITEM_H

@@ -29,13 +29,14 @@ MazeEngine::MazeEngine(QObject *parent) :
 }
 MazeEngine::~MazeEngine() {
 	foreach (MazeItem *i, _items) {
+		// Items are not supposed to exist without engine
 		delete i;
 	}
 }
 
 void MazeEngine::generateRandom(int size) {
 	pass p;
-	// Fill maze with passes but leave walls on the sides.
+	// Fill maze with passes but leave walls on the sides
 	int exitNumber = rand() % (size * 4);
 	for (int i = 0; i < size; i++) {
 		for (int j = 0; j < size; j++) {
@@ -120,7 +121,7 @@ void MazeEngine::generateRandom(int size) {
 		// Don't check for blockers if there're no walls around
 
 		if(blocker->count() > 0) {
-			qDebug() << "found a closed loop consisting of" << blocker->count() << "walls";
+			qDebug() << "found a closed loop consisting of" << blocker->count() / 2 << "walls";
 			p = blocker->at(rand() % blocker->count());
 			_passes.append(p);
 			std::swap(p.s, p.e);
@@ -162,6 +163,7 @@ void MazeEngine::findBlockers(QList<pass> *blockingWalls, QPoint initialLocation
 		break;
 	case Error:
 		qDebug() << "wtf?";
+		checkDir = Error;
 		break;
 	}
 	if(canGo(location, checkDir)) {
@@ -225,6 +227,7 @@ void MazeEngine::findBlockers(QList<pass> *blockingWalls, QPoint initialLocation
 			break;
 		case Error:
 			qDebug() << "wtf?";
+			checkDir = Error;
 			break;
 		}
 
@@ -252,12 +255,13 @@ bool MazeEngine::canGo(QPoint location, QString dir) {
 	else return false;
 }
 
-// Should only be called after check with canGo()
+// Should only be called after check with canGo
 QPoint MazeEngine::move(QPoint location, direction dir) {
 	foreach(pass i, _passes) {
 		if(i.s == location && i.d == dir)
 			return i.e;
 	}
+	// return won't be called only if canGo doesn't pass
 }
 
 void MazeEngine::registerItem(MazeItem *item) {
@@ -266,6 +270,13 @@ void MazeEngine::registerItem(MazeItem *item) {
 	connect(item, SIGNAL(locationChanged(MazeItem*)), this, SLOT(checkIntersection(MazeItem*)));
 	// Movable items have turns
 	if(item->movable) {
+		if(item->killer) {
+			// Connection between turnEnded and findPaths is here because I didn't find a way to connect it in MazeItem class (it's constructor doesn't know if item is killer)
+			// I also don't want to force every killer to do it themselves
+			connect(item, SIGNAL(turnEnded()), item, SLOT(findPaths()));
+			// TODO: execute findPaths somewhere else so unmovable killers (traps) are possible
+		}
+
 		// If added item is marked as having current turn, remove this mark from all other items. Just for the case.
 		if(item->currentTurn()) {
 			foreach (MazeItem *i, _turns) {
@@ -275,10 +286,34 @@ void MazeEngine::registerItem(MazeItem *item) {
 		_turns.append(item);
 		connect(item, SIGNAL(turnEnded()), this, SLOT(switchTurn()));
 	}
+	// Killers have targets
+	if(item->killer) {
+		foreach (MazeItem *i, _items) {
+			if(i->killable) {
+				item->targets.append(i);
+			}
+		}
+	}
+	// Killable items are killers' targets
+	if(item->killable) {
+		foreach (MazeItem *i, _items) {
+			if(i->killer) {
+				i->targets.append(item);
+			}
+		}
+	}
 }
 
 void MazeEngine::removeItem(MazeItem *item) {
 	qDebug() << "item removed";
+	// If item is killable we remove it from every killer's target list
+	if(item->killable) {
+		foreach (MazeItem *i, _items) {
+			if(i->killer) {
+				i->targets.removeAll(item);
+			}
+		}
+	}
 	_items.removeAll(item);
 }
 
@@ -297,6 +332,8 @@ void MazeEngine::switchTurn() {
 	bool switchFlag = false;
 	foreach (MazeItem *i, _turns) {
 		if(switchFlag) {
+			if(i->killable)
+				i->setDangerLevel(checkDanger(i));
 			i->setCurrentTurn(true);
 			switchFlag = false;
 		}
@@ -305,6 +342,41 @@ void MazeEngine::switchTurn() {
 			switchFlag = true;
 		}
 	}
-	if(switchFlag)
+	if(switchFlag) {
+		if(_turns.first()->killable)
+			_turns.first()->setDangerLevel(checkDanger(_turns.first()));
 		_turns.first()->setCurrentTurn(true);
+	}
+}
+
+// TODO: Move this to MazeItem side so each killer type could have it's own algorythm for danger level evaluation
+int MazeEngine::checkDanger(MazeItem *item) {
+	int d = 0;
+	foreach (MazeItem *dangerSource, _turns) {
+		if(dangerSource->killer) {
+			switch(dangerSource->paths.take(item).count()) {
+			case 1:
+				if(d < 5)
+					d = 5;
+				break;
+			case 2:
+				if(d < 4)
+					d = 4;
+				break;
+			case 3:
+				if(d < 3)
+					d = 3;
+				break;
+			case 4:
+				if(d < 2)
+					d = 2;
+				break;
+			case 5:
+				if(d < 1)
+					d = 1;
+				break;
+			}
+		}
+	}
+	return d;
 }

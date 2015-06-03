@@ -58,11 +58,14 @@ public slots:
 	void switchTurn();
 
 private:
+	// Maze is stored in form of a list of one-sided edges of pass graph
+	// This makes possible portals and one-sided walls. Not sure if they're needed but why not?
 	QList<pass> _passes;
 	QList<MazeItem*> _items;
 	QList<MazeItem*> _turns;
 
 	void findBlockers(QList<pass> *blockingWalls, QPoint initialLocation, direction initialDirection, QPoint location, direction dir, bool debug = false, bool start = true);
+	int checkDanger(MazeItem *item);
 };
 
 #endif // MAZEENGINE_H

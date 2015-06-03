@@ -23,7 +23,8 @@
 MazeItem::MazeItem(QObject *parent) :
 	QObject(parent),
 	_engine(NULL),
-	_turn(false){}
+	_turn(false) {}
+
 MazeItem::~MazeItem() {
 	if(_engine)
 		_engine->removeItem(this);
@@ -57,8 +58,28 @@ void MazeItem::setCurrentTurn(bool currentTurn) {
 	}
 }
 
+void MazeItem::setDangerLevel(int dangerLevel) {
+	if(dangerLevel != _danger) {
+		_danger = dangerLevel;
+		emit dangerChanged();
+	}
+}
+
+void MazeItem::findPaths() {
+	paths.clear();
+	foreach (MazeItem *target, targets) {
+		QList<QPoint> path;
+		path.append(this->location());
+		qDebug() << "from" << this->location().x() << this->location().y() << "to" << target->location().x() << target->location().y();
+		if(searchPath(&path, target->location())) {
+			qDebug() << path.count();
+			paths.insert(target, path);
+		}
+	}
+}
+
 bool MazeItem::move(direction dir) {
-	if(_engine) {
+	if(_engine && movable) {
 		if(currentTurn() && _engine->canGo(_location, dir)) {
 			setLocation(_engine->move(_location, dir));
 			emit turnEnded();
@@ -79,4 +100,51 @@ void MazeItem::intersected(MazeItem *item) {
 		emit wasKilled();
 	if(this->pickable && item->picker)
 		emit wasPicked();
+}
+
+bool MazeItem::searchPath(QList<QPoint> *path, QPoint target) {
+	if(path->last() == target) {
+		return true;
+	}
+	bool found = false;
+	QList<QPoint> testPath, resultPath;
+	direction d;
+	testPath = *path;
+	d = Up;
+	if(_engine->canGo(path->last(), d) && !path->contains(_engine->move(path->last(), d))) {
+		testPath.append(_engine->move(path->last(), d));
+		if(searchPath(&testPath, target) && (!found || testPath.count() < path->count())) {
+			resultPath = testPath;
+			found = true;
+		}
+	}
+	testPath = *path;
+	d = Down;
+	if(_engine->canGo(path->last(), d) && !path->contains(_engine->move(path->last(), d))) {
+		testPath.append(_engine->move(path->last(), d));
+		if(searchPath(&testPath, target) && (!found || testPath.count() < resultPath.count())) {
+			resultPath = testPath;
+			found = true;
+		}
+	}
+	testPath = *path;
+	d = Left;
+	if(_engine->canGo(path->last(), d) && !path->contains(_engine->move(path->last(), d))) {
+		testPath.append(_engine->move(path->last(), d));
+		if(searchPath(&testPath, target) && (!found || testPath.count() < resultPath.count())) {
+			resultPath = testPath;
+			found = true;
+		}
+	}
+	testPath = *path;
+	d = Right;
+	if(_engine->canGo(path->last(), d) && !path->contains(_engine->move(path->last(), d))) {
+		testPath.append(_engine->move(path->last(), d));
+		if(searchPath(&testPath, target) && (!found || testPath.count() < resultPath.count())) {
+			resultPath = testPath;
+			found = true;
+		}
+	}
+	*path = resultPath;
+	return found;
 }

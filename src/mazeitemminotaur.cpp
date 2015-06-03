@@ -61,27 +61,29 @@ void MazeItemMinotaur::turnLowDifficulty() {
 	QList<direction> allowedList = QList<direction>();
 	direction d;
 	d = Up;
-	if(this->engine()->canGo(this->location(), d) && this->engine()->availableLocations.contains(this->engine()->move(this->location(), d)))
+	if(_engine->canGo(this->location(), d) && _engine->availableLocations.contains(_engine->move(this->location(), d)))
 		allowedList += d;
 	d = Down;
-	if(this->engine()->canGo(this->location(), d) && this->engine()->availableLocations.contains(this->engine()->move(this->location(), d)))
+	if(_engine->canGo(this->location(), d) && _engine->availableLocations.contains(_engine->move(this->location(), d)))
 		allowedList += d;
 	d = Left;
-	if(this->engine()->canGo(this->location(), d) && this->engine()->availableLocations.contains(this->engine()->move(this->location(), d)))
+	if(_engine->canGo(this->location(), d) && _engine->availableLocations.contains(_engine->move(this->location(), d)))
 		allowedList += d;
 	d = Right;
-	if(this->engine()->canGo(this->location(), d) && this->engine()->availableLocations.contains(this->engine()->move(this->location(), d)))
+	if(_engine->canGo(this->location(), d) && _engine->availableLocations.contains(_engine->move(this->location(), d)))
 		allowedList += d;
 
 	this->move(allowedList.at(rand() % allowedList.count()));
 }
 
 void MazeItemMinotaur::turnMediumDifficulty() {
+	// Not implemented
 	usleep(1000000);
 	emit turnEnded();
 }
 
 void MazeItemMinotaur::turnHighDifficulty() {
+	// Not implemented
 	usleep(10000000);
 	emit turnEnded();
 }
