@@ -144,43 +144,43 @@ Page {
 			states: [
 				State {
 					name: "default"
-					changes: PropertyChanges {
-						target: rootContainer
-						x: - labyrinth.width / size
-						y: - labyrinth.height / size
-					}
+                    changes: PropertyChanges {
+                        target: rootContainer
+                        x: - labyrinth.width / size
+                        y: - labyrinth.height / size
+                    }
 				},
 				State {
 					name: "movingUp"
-					changes: PropertyChanges {
-						target: rootContainer
-						x: - labyrinth.width / size
-						y: 0
-					}
+                    changes: PropertyChanges {
+                        target: rootContainer
+                        x: - labyrinth.width / size
+                        y: 0
+                    }
 				},
 				State {
 					name: "movingDown"
-					changes: PropertyChanges {
-						target: rootContainer
-						x: - labyrinth.width / size
-						y: -2 * labyrinth.height / size
-					}
+                    changes: PropertyChanges {
+                        target: rootContainer
+                        x: - labyrinth.width / size
+                        y: -2 * labyrinth.height / size
+                    }
 				},
 				State {
 					name: "movingLeft"
-					changes: PropertyChanges {
-						target: rootContainer
-						x: 0
-						y: - labyrinth.height / size
-					}
+                    changes: PropertyChanges {
+                        target: rootContainer
+                        x: 0
+                        y: - labyrinth.height / size
+                    }
 				},
 				State {
 					name: "movingRight"
-					changes: PropertyChanges {
-						target: rootContainer
-						x: -2 * labyrinth.width / size
-						y: - labyrinth.height / size
-					}
+                    changes: PropertyChanges {
+                        target: rootContainer
+                        x: -2 * labyrinth.width / size
+                        y: - labyrinth.height / size
+                    }
 				}]
 
 			transitions: [
@@ -224,13 +224,13 @@ Page {
 				}]
 		}
 
-		Rectangle {
+        Image {
 			id: playerRect
 			anchors.centerIn: parent
-			width: labyrinth.width / size - 2*Theme.paddingSmall
-			height: labyrinth.height / size - 2*Theme.paddingSmall
-			color: "magenta"
-		}
+            width: labyrinth.width / size
+            height: labyrinth.height / size
+            source: "../images/hero.svg"
+        }
 
 		Rectangle {
 			id: controlsContainer
@@ -332,16 +332,20 @@ Page {
 					if(relativeY <= -Math.abs(relativeX)) {
 						// Upper quarter
 						controlsContainer.direction = "Up"
+                        playerRect.rotation = 180
 					} else if(relativeX >= Math.abs(relativeY)) {
 						// Right quarter
 						controlsContainer.direction = "Right"
-					} else if(relativeY >= Math.abs(relativeX)) {
+                        playerRect.rotation = 270
+                    } else if(relativeY >= Math.abs(relativeX)) {
 						// Bottom quarter
 						controlsContainer.direction = "Down"
-					} else {
+                        playerRect.rotation = 0
+                    } else {
 						// Left quarter
 						controlsContainer.direction = "Left"
-					}
+                        playerRect.rotation = 90
+                    }
 				}
 			}
 

@@ -36,7 +36,8 @@ OTHER_FILES += qml/harbour-minotaur.qml \
     qml/images/icon.png \
     qml/pages/WinPage.qml \
     qml/pages/LosePage.qml \
-    qml/images/move.svg
+    qml/images/move.svg \
+    qml/images/hero.svg
 
 # to disable building translations every time, comment out the
 # following CONFIG line
