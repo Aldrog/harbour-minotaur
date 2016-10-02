@@ -18,6 +18,7 @@
  */
 
 #include "mazeitem.h"
+#include "mazeitemkiller.h"
 #include <QDebug>
 
 MazeItem::MazeItem(QObject *parent) :
@@ -65,19 +66,6 @@ void MazeItem::setDangerLevel(int dangerLevel) {
 	}
 }
 
-void MazeItem::findPaths() {
-	paths.clear();
-	foreach (MazeItem *target, targets) {
-		QList<QPoint> path;
-		path.append(this->location());
-		qDebug() << "from" << this->location().x() << this->location().y() << "to" << target->location().x() << target->location().y();
-		if(searchPath(&path, target->location())) {
-			qDebug() << path.count();
-			paths.insert(target, path);
-		}
-	}
-}
-
 bool MazeItem::move(direction dir) {
 	if(_engine && movable) {
 		if(currentTurn() && _engine->canGo(_location, dir)) {
@@ -96,55 +84,55 @@ void MazeItem::randLocation() {
 }
 
 void MazeItem::intersected(MazeItem *item) {
-	if(this->killable && item->killer)
+    if(this->killable && dynamic_cast<MazeItemKiller*>(item))
 		emit wasKilled();
 	if(this->pickable && item->picker)
 		emit wasPicked();
 }
 
 bool MazeItem::searchPath(QList<QPoint> *path, QPoint target) {
-	if(path->last() == target) {
-		return true;
-	}
-	bool found = false;
-	QList<QPoint> testPath, resultPath;
-	direction d;
-	testPath = *path;
-	d = Up;
-	if(_engine->canGo(path->last(), d) && !path->contains(_engine->move(path->last(), d))) {
-		testPath.append(_engine->move(path->last(), d));
-		if(searchPath(&testPath, target) && (!found || testPath.count() < path->count())) {
-			resultPath = testPath;
-			found = true;
-		}
-	}
-	testPath = *path;
-	d = Down;
-	if(_engine->canGo(path->last(), d) && !path->contains(_engine->move(path->last(), d))) {
-		testPath.append(_engine->move(path->last(), d));
-		if(searchPath(&testPath, target) && (!found || testPath.count() < resultPath.count())) {
-			resultPath = testPath;
-			found = true;
-		}
-	}
-	testPath = *path;
-	d = Left;
-	if(_engine->canGo(path->last(), d) && !path->contains(_engine->move(path->last(), d))) {
-		testPath.append(_engine->move(path->last(), d));
-		if(searchPath(&testPath, target) && (!found || testPath.count() < resultPath.count())) {
-			resultPath = testPath;
-			found = true;
-		}
-	}
-	testPath = *path;
-	d = Right;
-	if(_engine->canGo(path->last(), d) && !path->contains(_engine->move(path->last(), d))) {
-		testPath.append(_engine->move(path->last(), d));
-		if(searchPath(&testPath, target) && (!found || testPath.count() < resultPath.count())) {
-			resultPath = testPath;
-			found = true;
-		}
-	}
-	*path = resultPath;
-	return found;
+    if(path->last() == target) {
+        return true;
+    }
+    bool found = false;
+    QList<QPoint> testPath, resultPath;
+    direction d;
+    testPath = *path;
+    d = Up;
+    if(_engine->canGo(path->last(), d) && !path->contains(_engine->move(path->last(), d))) {
+        testPath.append(_engine->move(path->last(), d));
+        if(searchPath(&testPath, target) && (!found || testPath.count() < path->count())) {
+            resultPath = testPath;
+            found = true;
+        }
+    }
+    testPath = *path;
+    d = Down;
+    if(_engine->canGo(path->last(), d) && !path->contains(_engine->move(path->last(), d))) {
+        testPath.append(_engine->move(path->last(), d));
+        if(searchPath(&testPath, target) && (!found || testPath.count() < resultPath.count())) {
+            resultPath = testPath;
+            found = true;
+        }
+    }
+    testPath = *path;
+    d = Left;
+    if(_engine->canGo(path->last(), d) && !path->contains(_engine->move(path->last(), d))) {
+        testPath.append(_engine->move(path->last(), d));
+        if(searchPath(&testPath, target) && (!found || testPath.count() < resultPath.count())) {
+            resultPath = testPath;
+            found = true;
+        }
+    }
+    testPath = *path;
+    d = Right;
+    if(_engine->canGo(path->last(), d) && !path->contains(_engine->move(path->last(), d))) {
+        testPath.append(_engine->move(path->last(), d));
+        if(searchPath(&testPath, target) && (!found || testPath.count() < resultPath.count())) {
+            resultPath = testPath;
+            found = true;
+        }
+    }
+    *path = resultPath;
+    return found;
 }

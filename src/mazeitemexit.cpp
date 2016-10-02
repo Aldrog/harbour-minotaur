@@ -23,7 +23,6 @@
 MazeItemExit::MazeItemExit(QObject *parent) :
 	MazeItem(parent) {
 	killable = false;
-	killer = false;
 	pickable = false;
 	picker = false;
 	movable = false;

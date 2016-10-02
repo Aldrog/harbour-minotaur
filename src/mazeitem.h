@@ -31,7 +31,7 @@ class MazeEngine;
 
 class MazeItem : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 protected:
 	MazeEngine *_engine;
 	QPoint _location;
@@ -44,7 +44,6 @@ public:
 
 	// Basic item properties
 	bool killable;
-	bool killer;
 	bool pickable;
 	bool picker;
 	bool movable;
@@ -65,13 +64,11 @@ public:
 	inline int dangerLevel()	{ return _danger; }
 	void setDangerLevel(int dangerLevel);
 
-	// Used by killers
-	QList<MazeItem*> targets;
-	QHash<MazeItem*, QList<QPoint> > paths;
-
-	bool move(direction dir);
+    bool move(direction dir);
 	Q_INVOKABLE inline bool move(QString dir) { return move(directionFromString(dir)); }
 	Q_INVOKABLE void randLocation();
+
+    bool searchPath(QList<QPoint> *path, QPoint target);
 
 signals:
 	void engineChanged();
@@ -86,10 +83,6 @@ signals:
 
 public slots:
 	virtual void intersected(MazeItem *item);
-	void findPaths();
-
-private:
-	bool searchPath(QList<QPoint> *path, QPoint target);
 };
 
 #endif // MAZEITEM_H

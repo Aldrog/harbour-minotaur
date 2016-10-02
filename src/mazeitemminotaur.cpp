@@ -22,10 +22,10 @@
 #include <QDebug>
 
 MazeItemMinotaur::MazeItemMinotaur(QObject *parent) :
-	MazeItem(parent)
+    MazeItem(parent),
+    MazeItemKiller(this)
 {
 	killable = false;
-	killer = true;
 	pickable = false;
 	picker = false;
 	movable = true;
@@ -78,12 +78,10 @@ void MazeItemMinotaur::turnLowDifficulty() {
 
 void MazeItemMinotaur::turnMediumDifficulty() {
 	// Not implemented
-	usleep(1000000);
 	emit turnEnded();
 }
 
 void MazeItemMinotaur::turnHighDifficulty() {
 	// Not implemented
-	usleep(10000000);
 	emit turnEnded();
 }

@@ -18,6 +18,7 @@
  */
 
 #include "mazeengine.h"
+#include "mazeitemkiller.h"
 #include <QDebug>
 
 bool operator ==(pass a, pass b) {
@@ -270,10 +271,11 @@ void MazeEngine::registerItem(MazeItem *item) {
 	connect(item, SIGNAL(locationChanged(MazeItem*)), this, SLOT(checkIntersection(MazeItem*)));
 	// Movable items have turns
 	if(item->movable) {
-		if(item->killer) {
+        MazeItemKiller *itemKiller = dynamic_cast<MazeItemKiller*>(item);
+        if(itemKiller) {
 			// Connection between turnEnded and findPaths is here because I didn't find a way to connect it in MazeItem class (it's constructor doesn't know if item is killer)
 			// I also don't want to force every killer to do it themselves
-			connect(item, SIGNAL(turnEnded()), item, SLOT(findPaths()));
+            connect(item, SIGNAL(turnEnded()), item, SLOT(findPaths()));
 			// TODO: execute findPaths somewhere else so unmovable killers (traps) are possible
 		}
 
@@ -287,18 +289,20 @@ void MazeEngine::registerItem(MazeItem *item) {
 		connect(item, SIGNAL(turnEnded()), this, SLOT(switchTurn()));
 	}
 	// Killers have targets
-	if(item->killer) {
+    MazeItemKiller *itemKiller = dynamic_cast<MazeItemKiller*>(item);
+    if(itemKiller) {
 		foreach (MazeItem *i, _items) {
 			if(i->killable) {
-				item->targets.append(i);
+                itemKiller->targets.append(i);
 			}
 		}
 	}
 	// Killable items are killers' targets
 	if(item->killable) {
 		foreach (MazeItem *i, _items) {
-			if(i->killer) {
-				i->targets.append(item);
+            MazeItemKiller *iKiller = dynamic_cast<MazeItemKiller*>(i);
+            if(iKiller) {
+                iKiller->targets.append(item);
 			}
 		}
 	}
@@ -309,8 +313,9 @@ void MazeEngine::removeItem(MazeItem *item) {
 	// If item is killable we remove it from every killer's target list
 	if(item->killable) {
 		foreach (MazeItem *i, _items) {
-			if(i->killer) {
-				i->targets.removeAll(item);
+            MazeItemKiller *iKiller = dynamic_cast<MazeItemKiller*>(i);
+            if(iKiller) {
+                iKiller->targets.removeAll(item);
 			}
 		}
 	}
@@ -353,8 +358,9 @@ void MazeEngine::switchTurn() {
 int MazeEngine::checkDanger(MazeItem *item) {
 	int d = 0;
 	foreach (MazeItem *dangerSource, _turns) {
-		if(dangerSource->killer) {
-			switch(dangerSource->paths.take(item).count()) {
+        MazeItemKiller *dangerSourceKiller = dynamic_cast<MazeItemKiller*>(dangerSource);
+        if(dangerSourceKiller) {
+            switch(dangerSourceKiller->paths.take(item).count()) {
 			case 1:
 				if(d < 5)
 					d = 5;

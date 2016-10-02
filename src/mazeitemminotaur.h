@@ -21,8 +21,11 @@
 #define MAZEITEMMINOTAUR_H
 
 #include "mazeitem.h"
+#include "mazeitemkiller.h"
 
-class MazeItemMinotaur : public MazeItem
+class MazeItemMinotaur :
+        public MazeItem,
+        public MazeItemKiller
 {
 	Q_OBJECT
 public:
@@ -44,6 +47,7 @@ signals:
 
 public slots:
 	void turn();
+    void findPaths() { MazeItemKiller::findPaths(); }
 
 private:
 	void turnLowDifficulty();
