@@ -20,6 +20,7 @@
 import QtQuick 2.1
 import Sailfish.Silica 1.0
 import QtGraphicalEffects 1.0
+import QtFeedback 5.0
 import harbour.minotaur.maze 1.0
 
 Page {
@@ -30,6 +31,16 @@ Page {
 	property int wallWidth: 4
 	// We store known walls as a string consisting of lines like \x\y\l or \x\y\t. l and t mean left and top sides of the cell.
 	property string walls: ""
+
+    HapticsEffect {
+        id: dangerEffect
+        attackIntensity: 1.0
+        attackTime: 2500
+        intensity: 2.0
+        duration: 1000
+        fadeIntensity: 0.5
+        fadeTime: 1500
+    }
 
 	MazeEngine {
 		id: engine
@@ -46,8 +57,10 @@ Page {
 
 		onOutOfMaze: pageStack.replace(Qt.resolvedUrl("WinPage.qml"))
 		onWasKilled: pageStack.replace(Qt.resolvedUrl("LosePage.qml"))
-		onDangerChanged: console.log("WARNING", dangerLevel)
-		// TODO: implement vibration and other effects on turnStarted according to dangerLevel
+        onDangerChanged: {
+            if(dangerLevel > 0)
+                dangerEffect.start()
+        }
 	}
 	MazeItemMinotaur {
 		id: minotaur
